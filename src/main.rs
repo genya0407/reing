@@ -6,49 +6,43 @@ extern crate dotenv;
 extern crate r2d2;
 extern crate r2d2_postgres;
 extern crate chrono;
+extern crate reing;
 
 use std::env;
 use std::ops::Deref;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
-use chrono::prelude::*;
+//use chrono::prelude::*;
 
 type PostgresPool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager>;
-type PostgresConn = r2d2::PooledConnection<r2d2_postgres::PostgresConnectionManager>;
 
-struct DbConn(pub PostgresConn);
+struct Repository(pub reing::Repository);
 
-impl Deref for DbConn {
-    type Target = PostgresConn;
+impl Deref for Repository {
+    type Target = reing::Repository;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a, 'r> FromRequest<'a, 'r> for DbConn {
+impl<'a, 'r> FromRequest<'a, 'r> for Repository {
     type Error = ();
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
         let pool = request.guard::<State<PostgresPool>>()?;
         match pool.get() {
-            Ok(conn) => Outcome::Success(DbConn(conn)),
+            Ok(conn) => Outcome::Success(Repository(reing::Repository::new(conn))),
             Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
         }
     }
 }
 
 #[get("/")]
-fn index(conn: DbConn) -> &'static str {
-    let rows = conn.query(
-        "INSERT INTO questions (body, ip_address) values ($1, $2) returning id, created_at",
-        &[&"bodybody".to_string(), &"192.168.1.1".to_string()]
-    ).unwrap();
-    let id: i32 = rows.iter().next().unwrap().get("id");
-    let created_at: DateTime<Local> = rows.iter().next().unwrap().get("created_at");
-    println!("{}", id);
-    println!("{}", created_at);
+fn index(repository: Repository) -> &'static str {
+    let question = repository.store_question("testtest".to_string(), "192.168.1.1".to_string());
+    println!("{:?}", question);
     "Hello, world!"
 }
 
