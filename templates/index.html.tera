@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang='ja'>
+    <head>
+        
+    </head>
+    <body>
+        {% for question in questions %}
+            <div>
+                {{ question.body }}
+            </div>
+        {% endfor %}
+    </body>
+</html>

@@ -1,7 +1,11 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 extern crate rocket;
+extern crate rocket_contrib;
 extern crate dotenv;
 extern crate r2d2;
 extern crate r2d2_postgres;
@@ -10,10 +14,14 @@ extern crate reing;
 
 use std::env;
 use std::ops::Deref;
+use std::path::{Path, PathBuf};
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
-//use chrono::prelude::*;
+use rocket::response;
+use rocket::response::status;
+use rocket_contrib::Template;
+use chrono::prelude::*;
 
 type PostgresPool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager>;
 
@@ -39,11 +47,42 @@ impl<'a, 'r> FromRequest<'a, 'r> for Repository {
     }
 }
 
+#[get("/static/<file..>")]
+fn files(file: PathBuf) -> Result<response::NamedFile, status::NotFound<String>> {
+    let path = Path::new("static/").join(file);
+    response::NamedFile::open(&path)
+        .map_err(|_| status::NotFound(format!("Bad path: {:?}", path)))
+}
+
+#[derive(Serialize, Debug)]
+struct QuestionDTO {
+    pub id: i32,
+    pub body: String,
+    pub ip_address: String,
+    pub hidden: bool,
+    pub created_at: DateTime<Local>,
+}
+
+impl QuestionDTO {
+    fn from(q: reing::Question) -> Self {
+        Self {
+            id: q.id, body: q.body, ip_address: q.ip_address,
+            hidden: q.hidden, created_at: q.created_at
+        }
+    }
+}
+
+
+#[derive(Serialize, Debug)]
+struct IndexDTO {
+    pub questions: Vec<QuestionDTO>
+}
+
 #[get("/")]
-fn index(repository: Repository) -> &'static str {
-    let question = repository.store_question("testtest".to_string(), "192.168.1.1".to_string());
-    println!("{:?}", question);
-    "Hello, world!"
+fn index(repo: Repository) -> Template {
+    let question_dtos = repo.all_questions().into_iter().map(|q| QuestionDTO::from(q)).collect::<Vec<_>>();
+    let context = IndexDTO { questions: question_dtos };
+    Template::render("index", &context)
 }
 
 fn main() {
@@ -60,5 +99,6 @@ fn main() {
     rocket::ignite()
         .manage(pool)
         .mount("/", routes![index])
+        .attach(Template::fairing())
         .launch();
 }
