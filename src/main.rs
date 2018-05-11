@@ -5,12 +5,14 @@ extern crate rocket;
 extern crate dotenv;
 extern crate r2d2;
 extern crate r2d2_postgres;
+extern crate chrono;
 
 use std::env;
 use std::ops::Deref;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
+use chrono::prelude::*;
 
 type PostgresPool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager>;
 type PostgresConn = r2d2::PooledConnection<r2d2_postgres::PostgresConnectionManager>;
@@ -39,7 +41,14 @@ impl<'a, 'r> FromRequest<'a, 'r> for DbConn {
 
 #[get("/")]
 fn index(conn: DbConn) -> &'static str {
-    conn.execute("INSERT INTO questions (body, ip_address) values ($1, $2)", &[&"bodybody".to_string(), &"192.168.1.1".to_string()]).unwrap();
+    let rows = conn.query(
+        "INSERT INTO questions (body, ip_address) values ($1, $2) returning id, created_at",
+        &[&"bodybody".to_string(), &"192.168.1.1".to_string()]
+    ).unwrap();
+    let id: i32 = rows.iter().next().unwrap().get("id");
+    let created_at: DateTime<Local> = rows.iter().next().unwrap().get("created_at");
+    println!("{}", id);
+    println!("{}", created_at);
     "Hello, world!"
 }
 
