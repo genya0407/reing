@@ -14,66 +14,14 @@ extern crate chrono;
 extern crate reing;
 
 use std::env;
-use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::net::SocketAddr;
-use rocket::http::Status;
-use rocket::request::{self, FromRequest};
-use rocket::{Request, State, Outcome};
+use rocket::request;
 use rocket::response;
 use rocket::response::status;
 use rocket_contrib::Template;
 use chrono::prelude::*;
 
-/* Guard Repository */
-
-type PostgresPool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager>;
-
-struct Repository(pub reing::Repository);
-
-impl Deref for Repository {
-    type Target = reing::Repository;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a, 'r> FromRequest<'a, 'r> for Repository {
-    type Error = ();
-
-    fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
-        let pool = request.guard::<State<PostgresPool>>()?;
-        match pool.get() {
-            Ok(conn) => Outcome::Success(Repository(reing::Repository::new(conn))),
-            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
-        }
-    }
-}
-
-/* Guard Client IP address */
-
-struct ClientIP(pub SocketAddr);
-
-impl ClientIP {
-    fn address(&self) -> String {
-        match self.0 {
-            SocketAddr::V4(v4) => format!("{}", v4.ip()),
-            SocketAddr::V6(v6) => format!("{}", v6.ip())
-        }
-    }
-}
-
-impl<'a, 'r> FromRequest<'a, 'r> for ClientIP {
-    type Error = ();
-
-    fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
-        match request.remote() {
-            Some(socket_addr) => Outcome::Success(ClientIP(socket_addr)),
-            None => Outcome::Failure((Status::ServiceUnavailable, ()))
-        }
-    }
-}
+mod web;
 
 /* GET /static/ */
 
@@ -110,7 +58,7 @@ struct IndexDTO {
 }
 
 #[get("/")]
-fn index(repo: Repository) -> Template {
+fn index(repo: web::guard::Repository) -> Template {
     let question_dtos = repo.all_questions().into_iter().map(|q| QuestionDTO::from(q)).collect::<Vec<_>>();
     let context = IndexDTO { questions: question_dtos };
     Template::render("index", &context)
@@ -124,7 +72,7 @@ struct PostQuestionForm {
 }
 
 #[post("/questions", data = "<params>")]
-fn post_question(repo: Repository, client_ip: ClientIP, params: request::Form<PostQuestionForm>)
+fn post_question(repo: web::guard::Repository, client_ip: web::guard::ClientIP, params: request::Form<PostQuestionForm>)
      -> response::Redirect {
     let _question = repo.store_question(params.get().body.clone(), client_ip.address());
     //response::Redirect::to(&format!("/question/{}", question.id))
