@@ -1,6 +1,7 @@
 use model;
 use r2d2;
-use r2d2_postgres;
+use r2d2_diesel;
+use diesel;
 use std::ops::Deref;
 use std::net::SocketAddr;
 use rocket::http::Status;
@@ -9,7 +10,7 @@ use rocket::{Request, State, Outcome};
 
 /* Guard Repository */
 
-type PostgresPool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager>;
+type DieselPool = r2d2::Pool<r2d2_diesel::ConnectionManager<diesel::PgConnection>>;
 
 pub struct Repository(pub model::Repository);
 
@@ -25,7 +26,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Repository {
     type Error = ();
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
-        let pool = request.guard::<State<PostgresPool>>()?;
+        let pool = request.guard::<State<DieselPool>>()?;
         match pool.get() {
             Ok(conn) => Outcome::Success(Repository(model::Repository::new(conn))),
             Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))

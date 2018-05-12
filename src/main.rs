@@ -9,12 +9,12 @@ extern crate rocket;
 extern crate rocket_contrib;
 extern crate dotenv;
 extern crate r2d2;
-extern crate r2d2_postgres;
+extern crate r2d2_diesel;
 extern crate chrono;
-extern crate postgres;
 extern crate query_builder;
 extern crate egg_mode;
 extern crate tokio_core;
+extern crate diesel;
 
 use std::env;
 use std::path::{Path, PathBuf};
@@ -86,10 +86,9 @@ fn post_question(repo: web::guard::Repository, client_ip: web::guard::ClientIP, 
 
 fn main() {
     dotenv::dotenv().ok();
-    let manager = r2d2_postgres::PostgresConnectionManager::new(
-        env::var("DATABASE_URL").unwrap(),
-        r2d2_postgres::TlsMode::None
-    ).unwrap();
+    let manager = r2d2_diesel::ConnectionManager::<diesel::PgConnection>::new(
+        env::var("DATABASE_URL").unwrap()
+    );
     let pool = r2d2::Pool::builder()
         .max_size(15)
         .build(manager)
