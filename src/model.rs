@@ -4,7 +4,9 @@ use r2d2_diesel;
 use diesel;
 use db;
 use std::ops::Deref;
+use std::collections::HashMap;
 use diesel::RunQueryDsl;
+use diesel::QueryDsl;
 
 type DieselConnection = r2d2::PooledConnection<r2d2_diesel::ConnectionManager<diesel::PgConnection>>;
 
@@ -60,19 +62,30 @@ impl Repository {
     }
 
     pub fn all_questions(&self) -> Vec<Question> {
-        use db::schema::questions;
+        use db::schema::{questions, answers};
 
-        let qs = questions::table.load::<db::Question>(self.conn()).unwrap();
-        qs.into_iter().map(|q| {
-            Question {
-                id: q.id,
-                body: q.body,
-                ip_address: q.ip_address,
-                created_at: q.created_at.with_timezone(&Local),
-                hidden: q.hidden,
-                answers: vec![]
-            }
-        }).collect::<Vec<Question>>()
+        let qas = questions::table
+                .left_join(answers::table)
+                .load::<(db::Question, Option<db::Answer>)>(self.conn())
+                .unwrap();
+
+        let mut q_map: HashMap<i32, Question> = HashMap::new();
+        for (q, a_opt) in qas {
+            q_map.entry(q.id)
+                .and_modify(|question| {
+                    if let Some(a) = a_opt.clone() {
+                        question.answers.push(self.row2answer(a))
+                    }
+                }).or_insert_with(|| {
+                    let mut question = self.row2question(q);
+                    if let Some(a) = a_opt {
+                        question.answers.push(self.row2answer(a))
+                    }
+                    question
+                });
+        }
+
+        q_map.into_iter().map(|(_,v)| v).collect::<Vec<Question>>()
     }
 
     pub fn find_question(&self, id: i32) -> Option<Question> {
@@ -82,6 +95,22 @@ impl Repository {
         })
     }
 
-    pub fn hide_question(&self, _id: i32) {
+    fn row2question(&self, q: db::Question) -> Question {
+        Question {
+            id: q.id,
+            body: q.body,
+            ip_address: q.ip_address,
+            created_at: q.created_at.with_timezone(&Local),
+            hidden: q.hidden,
+            answers: vec![]
+        }
+    }
+
+    fn row2answer(&self, a: db::Answer) -> Answer {
+        Answer {
+            id: a.id,
+            body: a.body,
+            created_at: a.created_at.with_timezone(&Local)
+        }
     }
 }
