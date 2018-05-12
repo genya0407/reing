@@ -1,4 +1,4 @@
-use reing;
+use model;
 use r2d2;
 use r2d2_postgres;
 use std::ops::Deref;
@@ -11,10 +11,10 @@ use rocket::{Request, State, Outcome};
 
 type PostgresPool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager>;
 
-pub struct Repository(pub reing::Repository);
+pub struct Repository(pub model::Repository);
 
 impl Deref for Repository {
-    type Target = reing::Repository;
+    type Target = model::Repository;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -27,7 +27,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Repository {
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
         let pool = request.guard::<State<PostgresPool>>()?;
         match pool.get() {
-            Ok(conn) => Outcome::Success(Repository(reing::Repository::new(conn))),
+            Ok(conn) => Outcome::Success(Repository(model::Repository::new(conn))),
             Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
         }
     }

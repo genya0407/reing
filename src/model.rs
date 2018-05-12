@@ -1,12 +1,8 @@
-extern crate postgres;
-extern crate chrono;
-extern crate r2d2;
-extern crate r2d2_postgres;
-extern crate query_builder;
-
 use chrono::prelude::*;
 use query_builder::*;
 use postgres::rows::Row;
+use r2d2;
+use r2d2_postgres;
 
 type PostgresConn = r2d2::PooledConnection<r2d2_postgres::PostgresConnectionManager>;
 

@@ -11,7 +11,9 @@ extern crate dotenv;
 extern crate r2d2;
 extern crate r2d2_postgres;
 extern crate chrono;
-extern crate reing;
+extern crate postgres;
+extern crate query_builder;
+
 
 use std::env;
 use std::path::{Path, PathBuf};
@@ -22,6 +24,7 @@ use rocket_contrib::Template;
 use chrono::prelude::*;
 
 mod web;
+mod model;
 
 /* GET /static/ */
 
@@ -44,7 +47,7 @@ struct QuestionDTO {
 }
 
 impl QuestionDTO {
-    fn from(q: reing::Question) -> Self {
+    fn from(q: model::Question) -> Self {
         Self {
             id: q.id, body: q.body, ip_address: q.ip_address,
             hidden: q.hidden, created_at: q.created_at
