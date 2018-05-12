@@ -4,14 +4,45 @@ use image::{Rgb, RgbImage};
 use image::ImageBuffer;
 use rusttype::{Font, FontCollection, Scale};
 
-pub fn text2image(text: String) {// -> image::RgbImage {
+#[test]
+fn text2image_test() {
+    use std::path::Path;
+    let img = text2image(String::from("私はその人を常に先生と呼んでいた。\nだからここでもただ先生と書くだけで本名はuchiaけない。これは世間を憚かる遠慮というよりも、その方が私にとって自然だからである。\n私はその人の記憶を呼び起すごとに、すぐ「先生」といいたくなる。\n筆を執っても心持は同じ事である。\nよそよそしい頭文字などはとても使う気にならない。"));
+    img.save(Path::new("test.png"));
+}
+
+pub fn text2image(text: String) -> image::RgbImage {
     let font = get_font();
 
-    let half_font_size = 22.5;
-    let full_font_size = half_font_size * 2.;
+    let full_font_size = 22.5;
+    let half_font_size = full_font_size / 2.;
     let scale = Scale { x: full_font_size, y: full_font_size };
 
-    let wrapped_text = wrap_text(text, 40);
+    let max_text_length = 44;
+    let wrapped_text = wrap_text(text, max_text_length);
+
+    let image_width = 600;
+    let image_height = (50. + (wrapped_text.len() as f32) * full_font_size + 90.) as u32;
+    let mut image = RgbImage::from_pixel(image_width, image_height, Rgb([255,255,255]));
+    let x_offset = 50.;
+    let y_offset = 50.;
+
+    for (v_index, line) in wrapped_text.into_iter().enumerate() {
+        let mut h_index = 0u32;
+        for c in line.chars() {
+            let x_position = (x_offset + (h_index as f32) * half_font_size) as u32;
+            let y_position = (y_offset + (v_index as f32) * full_font_size) as u32;
+            draw_text_mut(
+                &mut image, Rgb([0, 0, 0]),
+                x_position, y_position,
+                scale, &font, &c.to_string()
+            );
+
+            h_index += char_len(c);
+        }
+    }
+
+    return image;
 }
 
 fn get_font<'a>() -> Font<'a> {
@@ -43,7 +74,7 @@ fn test_wrap_text() {
     );
 }
 
-pub fn wrap_text(text: String, max_length: u32 /* in ascii character */) -> Vec<String> {
+fn wrap_text(text: String, max_length: u32 /* in ascii character */) -> Vec<String> {
     let mut wrapped_lines = vec![];
     for original_line in text.lines() {
         let mut working_line: Vec<char> = vec![];
