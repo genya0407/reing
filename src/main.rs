@@ -13,7 +13,8 @@ extern crate r2d2_postgres;
 extern crate chrono;
 extern crate postgres;
 extern crate query_builder;
-
+extern crate egg_mode;
+extern crate tokio_core;
 
 use std::env;
 use std::path::{Path, PathBuf};
@@ -25,6 +26,7 @@ use chrono::prelude::*;
 
 mod web;
 mod model;
+//mod tweet;
 
 /* GET /static/ */
 
