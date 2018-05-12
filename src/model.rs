@@ -4,6 +4,7 @@ use r2d2_diesel;
 use diesel;
 use db;
 use std::ops::Deref;
+use diesel::RunQueryDsl;
 
 type DieselConnection = r2d2::PooledConnection<r2d2_diesel::ConnectionManager<diesel::PgConnection>>;
 
@@ -42,7 +43,6 @@ impl Repository {
 
         let question = {
             use db::schema::questions::dsl::*;
-            use diesel::RunQueryDsl;
             let q: db::Question = diesel::insert_into(questions)
                     .values(&new_question)
                     .get_result(self.conn())
@@ -60,7 +60,19 @@ impl Repository {
     }
 
     pub fn all_questions(&self) -> Vec<Question> {
-        vec![]
+        use db::schema::questions;
+
+        let qs = questions::table.load::<db::Question>(self.conn()).unwrap();
+        qs.into_iter().map(|q| {
+            Question {
+                id: q.id,
+                body: q.body,
+                ip_address: q.ip_address,
+                created_at: q.created_at.with_timezone(&Local),
+                hidden: q.hidden,
+                answers: vec![]
+            }
+        }).collect::<Vec<Question>>()
     }
 
     pub fn find_question(&self, id: i32) -> Option<Question> {
