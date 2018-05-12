@@ -1,7 +1,6 @@
 use image;
 use imageproc::drawing::draw_text_mut;
 use image::{Rgb, RgbImage};
-use image::ImageBuffer;
 use rusttype::{Font, FontCollection, Scale};
 
 #[test]
@@ -102,8 +101,4 @@ fn char_len(c: char) -> u32 { // in ascii character
     } else {
         2
     }
-}
-
-fn font_ascii_count(text: &str) -> u32 { // in ascii character
-    text.chars().map(|c| char_len(c)).sum::<u32>()
 }

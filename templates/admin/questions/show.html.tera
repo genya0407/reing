@@ -1,0 +1,12 @@
+{% extends "layout" %}
+
+{% block main %}
+<div>
+    <p>From {{ ip_address }}</p>
+    <p>{{ body }}</p>
+</div>
+<form action='/admin/question/{{ id }}/answer' method='POST'>
+    <textarea name='body'></textarea>
+    <button type='submit'>回答する</button>
+</form>
+{% endblock main %}

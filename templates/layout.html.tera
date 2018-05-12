@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang='ja'>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/static/css/application.css">
+    </head>
+    <body>
+        <main>
+            {% block main %}{% endblock main %}
+        </main>
+    </body>
+</html>

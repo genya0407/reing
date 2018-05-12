@@ -48,8 +48,24 @@ impl Repository {
         let q: db::Question = diesel::insert_into(questions::table)
                 .values(&new_question)
                 .get_result(self.conn())
-                .expect("Error saving new post");
+                .expect("Error saving new question");
         self.qas2questions(vec![(q, None)]).into_iter().next().unwrap()
+    }
+
+    pub fn store_answer(&self, id: i32, body: String) -> Option<Question> {
+        self.find_question(id).map(|mut question| {
+            let new_answer = db::NewAnswer {
+                question_id: question.id,
+                body: body
+            };
+            let a: db::Answer = diesel::insert_into(answers::table)
+                .values(&new_answer)
+                .get_result(self.conn())
+                .expect("Error saving new answer");
+            let answer = self.row2answer(a);
+            question.answers.push(answer);
+            question
+        })
     }
 
     pub fn all_questions(&self) -> Vec<Question> {

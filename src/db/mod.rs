@@ -1,6 +1,6 @@
 pub mod schema;
 
-use self::schema::questions;
+use self::schema::{questions, answers};
 use chrono::prelude::*;
 
 #[derive(Insertable)]
@@ -17,6 +17,13 @@ pub struct Question {
     pub ip_address: String,
     pub hidden: bool,
     pub created_at: DateTime<Utc>,
+}
+
+#[derive(Insertable)]
+#[table_name="answers"]
+pub struct NewAnswer {
+    pub question_id: i32,
+    pub body: String,
 }
 
 #[derive(Queryable, Debug, Clone)]
