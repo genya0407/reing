@@ -2,20 +2,22 @@
 #![feature(custom_derive)]
 #![plugin(rocket_codegen)]
 
-#[macro_use]
-extern crate serde_derive;
-extern crate serde;
+extern crate dotenv;
+extern crate chrono;
 extern crate rocket;
 extern crate rocket_contrib;
-extern crate dotenv;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 extern crate r2d2;
 extern crate r2d2_diesel;
-extern crate chrono;
-extern crate query_builder;
-extern crate egg_mode;
-extern crate tokio_core;
 #[macro_use]
 extern crate diesel;
+extern crate egg_mode;
+extern crate tokio_core;
+extern crate image;
+extern crate imageproc;
+extern crate rusttype;
 
 use std::env;
 use std::path::{Path, PathBuf};
@@ -28,6 +30,7 @@ use chrono::prelude::*;
 mod web;
 mod model;
 mod db;
+mod text2image;
 //mod tweet;
 
 /* GET /static/ */
