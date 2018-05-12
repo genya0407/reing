@@ -45,11 +45,6 @@ pub fn text2image(text: String) -> image::RgbImage {
     return image;
 }
 
-fn get_font<'a>() -> Font<'a> {
-    let font = Vec::from(include_bytes!("../assets/font/VL-Gothic-Regular.ttf") as &[u8]);
-    FontCollection::from_bytes(font).unwrap().into_font().unwrap()
-}
-
 #[test]
 fn test_wrap_text() {
     assert_eq!(
@@ -96,40 +91,9 @@ fn wrap_text(text: String, max_length: u32 /* in ascii character */) -> Vec<Stri
     return wrapped_lines;
 }
 
-pub fn _text2image(text: String) -> image::RgbImage {
+fn get_font<'a>() -> Font<'a> {
     let font = Vec::from(include_bytes!("../assets/font/VL-Gothic-Regular.ttf") as &[u8]);
-    let font = FontCollection::from_bytes(font).unwrap().into_font().unwrap();
-
-    let x_font_size = 5f32;
-    let y_font_size = 10f32;
-    let scale = Scale { x: x_font_size * 2., y: y_font_size };
-
-    let longest_line_length = text.lines().map(font_ascii_count).max().unwrap() / 2;
-    let line_count = text.lines().count();
-
-    let image_width = ((x_font_size * 2.) * longest_line_length as f32) as u32;
-    let image_height = (line_count as f32 * y_font_size) as u32;
-    let mut image = RgbImage::from_pixel(image_width, image_height, Rgb([255,255,255]));
-
-    for (v_index, line) in text.lines().enumerate() {
-        let mut h_index = 0u32;
-        for c in line.chars() {
-            draw_text_mut(
-                &mut image,
-                Rgb([0u8, 0u8, 0u8]),
-                (h_index as f32 * x_font_size) as u32, (v_index as f32 * y_font_size) as u32,
-                scale, &font, &c.to_string()
-            );
-
-            if c.is_ascii() {
-                h_index += 1;
-            } else {
-                h_index += 2;
-            }
-        }
-    }
-
-    return image;
+    FontCollection::from_bytes(font).unwrap().into_font().unwrap()
 }
 
 fn char_len(c: char) -> u32 { // in ascii character
