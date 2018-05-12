@@ -13,6 +13,13 @@ pub struct Question {
     pub ip_address: String,
     pub created_at: DateTime<Local>,
     pub hidden: bool,
+    pub answers: Vec<Answer>,
+}
+
+pub struct Answer {
+    pub id: i32,
+    pub body: String,
+    pub created_at: DateTime<Local>
 }
 
 pub struct Repository {
