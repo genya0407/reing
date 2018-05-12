@@ -7,6 +7,8 @@ use std::ops::Deref;
 use std::collections::HashMap;
 use diesel::RunQueryDsl;
 use diesel::QueryDsl;
+use diesel::ExpressionMethods;
+use db::schema::{questions, answers};
 
 type DieselConnection = r2d2::PooledConnection<r2d2_diesel::ConnectionManager<diesel::PgConnection>>;
 
@@ -43,32 +45,31 @@ impl Repository {
     pub fn store_question(&self, body: String, ip_address: String) -> Question {
         let new_question = db::NewQuestion { body: body, ip_address: ip_address };
 
-        let question = {
-            use db::schema::questions::dsl::*;
-            let q: db::Question = diesel::insert_into(questions)
-                    .values(&new_question)
-                    .get_result(self.conn())
-                    .expect("Error saving new post");
-            Question {
-                id: q.id,
-                body: q.body,
-                ip_address: q.ip_address,
-                created_at: q.created_at.with_timezone(&Local),
-                hidden: q.hidden,
-                answers: vec![]
-            }
-        };
-        return question;
+        let q: db::Question = diesel::insert_into(questions::table)
+                .values(&new_question)
+                .get_result(self.conn())
+                .expect("Error saving new post");
+        self.qas2questions(vec![(q, None)]).into_iter().next().unwrap()
     }
 
     pub fn all_questions(&self) -> Vec<Question> {
-        use db::schema::{questions, answers};
-
         let qas = questions::table
                 .left_join(answers::table)
                 .load::<(db::Question, Option<db::Answer>)>(self.conn())
                 .unwrap();
+        self.qas2questions(qas)
+    }
 
+    pub fn find_question(&self, id: i32) -> Option<Question> {
+        let qas = questions::table
+                .left_join(answers::table)
+                .filter(questions::id.eq(id))
+                .load::<(db::Question, Option<db::Answer>)>(self.conn())
+                .unwrap();
+        self.qas2questions(qas).into_iter().next()
+    }
+
+    fn qas2questions(&self, qas: Vec<(db::Question, Option<db::Answer>)>) -> Vec<Question> {
         let mut q_map: HashMap<i32, Question> = HashMap::new();
         for (q, a_opt) in qas {
             q_map.entry(q.id)
@@ -86,13 +87,6 @@ impl Repository {
         }
 
         q_map.into_iter().map(|(_,v)| v).collect::<Vec<Question>>()
-    }
-
-    pub fn find_question(&self, id: i32) -> Option<Question> {
-        Some(Question {
-            id: 0, body: "".to_string(), ip_address: "".to_string(), created_at: Local::now(),
-            hidden: false, answers: vec![]
-        })
     }
 
     fn row2question(&self, q: db::Question) -> Question {
