@@ -2,6 +2,8 @@ use chrono::prelude::*;
 use r2d2;
 use r2d2_diesel;
 use diesel;
+use db;
+use std::ops::Deref;
 
 type DieselConnection = r2d2::PooledConnection<r2d2_diesel::ConnectionManager<diesel::PgConnection>>;
 
@@ -23,19 +25,38 @@ pub struct Answer {
 }
 
 pub struct Repository {
-    conn: DieselConnection
+    pooled_connection: DieselConnection
 }
 
 impl Repository {
-    pub fn new(conn: DieselConnection) -> Self {
-        Self { conn: conn }
+    pub fn new(pooled_connection: DieselConnection) -> Self {
+        Self { pooled_connection: pooled_connection }
+    }
+
+    fn conn(&self) -> &diesel::PgConnection {
+        self.pooled_connection.deref()
     }
 
     pub fn store_question(&self, body: String, ip_address: String) -> Question {
-        Question {
-            id: 0, body: "".to_string(), ip_address: "".to_string(), created_at: Local::now(),
-            hidden: false, answers: vec![]
-        }
+        let new_question = db::NewQuestion { body: body, ip_address: ip_address };
+
+        let question = {
+            use db::schema::questions::dsl::*;
+            use diesel::RunQueryDsl;
+            let q: db::Question = diesel::insert_into(questions)
+                    .values(&new_question)
+                    .get_result(self.conn())
+                    .expect("Error saving new post");
+            Question {
+                id: q.id,
+                body: q.body,
+                ip_address: q.ip_address,
+                created_at: q.created_at.with_timezone(&Local),
+                hidden: q.hidden,
+                answers: vec![]
+            }
+        };
+        return question;
     }
 
     pub fn all_questions(&self) -> Vec<Question> {

@@ -9,13 +9,12 @@ rocket_codegen = "0.3.10"
 rocket_contrib = { version = "0.3.10", features = ["handlebars_templates", "tera_templates"] }
 query_builder = "0.3.1"
 dotenv = "0.11.0"
-r2d2 = "0.8.2"
-r2d2_postgres = "0.14.0"
 postgres = { version = "0.15.2", features = ["with-chrono"] }
 chrono = { version = "0.4.2", features = ["serde"] }
 serde = "1.0.53"
 serde_derive = "1.0.53"
 egg-mode = "0.12.0"
 tokio-core = "0.1.17"
-diesel = { version = "1.0.0", features = ["postgres"] }
+diesel = { version = "1.0.0", features = ["postgres", "chrono"] }
+r2d2 = "0.8.2"
 r2d2-diesel = "1.0.0"

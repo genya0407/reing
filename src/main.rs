@@ -14,6 +14,7 @@ extern crate chrono;
 extern crate query_builder;
 extern crate egg_mode;
 extern crate tokio_core;
+#[macro_use]
 extern crate diesel;
 
 use std::env;
@@ -26,6 +27,7 @@ use chrono::prelude::*;
 
 mod web;
 mod model;
+mod db;
 //mod tweet;
 
 /* GET /static/ */
