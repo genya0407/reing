@@ -4,4 +4,4 @@ CREATE TABLE questions (
     ip_address text not null,
     hidden boolean not null default 'f',
     created_at timestamp with time zone not null default CURRENT_TIMESTAMP
-);
+)
