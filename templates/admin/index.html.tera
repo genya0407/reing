@@ -2,8 +2,18 @@
 
 {% block main %}
 {% for q in questions %}
-    <ul>
-        <li><a href='/admin/question/{{q.id}}'>{{q.body}}</a></li>
-    </ul>
+<section class='admin-index'>
+    <div class='question-wrapper'>
+        <a href='/admin/question/{{q.id}}'>
+            <div class='question'>
+                <div class='header'>
+                    <span class='badge'>{{ q.created_at_recognizable }}</span>
+                </div>
+
+                <p>{{q.body}}</p>
+            </div>
+        </a>
+    </div>
+</section>
 {% endfor %}
 {% endblock main %}

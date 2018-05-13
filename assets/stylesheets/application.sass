@@ -7,7 +7,7 @@ $pale-black: #777
 
 @mixin card()
   @include shadow()
-  padding: 20px
+  padding: 15px
 
 @mixin radius-card()
   @include card()
@@ -34,6 +34,14 @@ header
 main
   max-width: 600px
   margin: auto
+
+span.badge
+  font-size: 12px
+  line-height: 18px
+  color: white
+  background-color: orange
+  border-radius: 15px
+  padding: 2px 10px
 
 div.question-form
   max-width: 400px
@@ -92,3 +100,15 @@ section.index
       padding: 10px
       & p
         margin: auto
+
+section.admin-index
+  & div.question-wrapper
+    margin-bottom: 20px
+    & a
+      text-decoration: none
+      color: $pale-black
+      & div.question
+        background-color: white
+        @include radius-card()
+        & p
+          margin-bottom: 0px

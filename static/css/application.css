@@ -19,6 +19,14 @@ main {
   max-width: 600px;
   margin: auto; }
 
+span.badge {
+  font-size: 12px;
+  line-height: 18px;
+  color: white;
+  background-color: orange;
+  border-radius: 15px;
+  padding: 2px 10px; }
+
 div.question-form {
   max-width: 400px;
   width: 90%;
@@ -65,5 +73,18 @@ section.index .profile {
     padding: 10px; }
     section.index .profile .content p {
       margin: auto; }
+
+section.admin-index div.question-wrapper {
+  margin-bottom: 20px; }
+  section.admin-index div.question-wrapper a {
+    text-decoration: none;
+    color: #777; }
+    section.admin-index div.question-wrapper a div.question {
+      background-color: white;
+      box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.05);
+      padding: 15px;
+      border-radius: 10px; }
+      section.admin-index div.question-wrapper a div.question p {
+        margin-bottom: 0px; }
 
 /*# sourceMappingURL=application.css.map */
