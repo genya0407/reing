@@ -112,3 +112,37 @@ section.admin-index
         @include radius-card()
         & p
           margin-bottom: 0px
+
+section.admin-question-show
+  & div.question
+    background-color: white
+    @include radius-card()
+    & p
+      margin-bottom: 0px
+
+div.answer-form
+  max-width: 400px
+  width: 90%
+  margin: 20px auto auto auto
+
+  & textarea
+    width: 100%
+    height: 200px
+    box-sizing: border-box
+    border-radius: 20px
+    border: 2px solid $feature-color
+    padding: 20px
+    font-size: 16px
+    color: $pale-black
+
+  & .submit-button
+    margin-top: 20px
+    text-align: center
+
+    & button
+      font-size: 20px
+      padding: 10px 20px 10px 20px
+      border-radius: 10px
+      background-color: white
+      border: 2px solid $feature-color
+      color: $pale-black

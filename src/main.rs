@@ -180,7 +180,7 @@ fn admin_post_answer(
         let img = text2image::text2image(question.body);
         tweet::tweet_answer(answer_body, img);
     }
-    response::Redirect::to("/")
+    response::Redirect::to("/admin")
 }
 
 /* Force login */
