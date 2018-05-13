@@ -40,7 +40,7 @@ pub fn tweet_answer(question_id: i32, answer: String, question_image: image::Rgb
             env::var("APPLICATION_DOMAIN").unwrap(),
             question_id
         );
-        let tweet_text = format!("{} {}", answer, question_url);
+        let tweet_text = format!("{} #reing {}", answer, question_url);
         let draft = DraftTweet::new(tweet_text)
                         .media_ids(&[media_handle.id]);
         core.run(draft.send(&token, &handle)).unwrap();
