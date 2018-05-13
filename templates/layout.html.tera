@@ -5,9 +5,11 @@
     </head>
     <body>
         <header>
+            {% block header %}
             <a href='/'>
                 <img src='/static/image/logo.png' />
             </a>
+            {% endblock header %}
         </header>
         <main>
             {% block main %}{% endblock main %}

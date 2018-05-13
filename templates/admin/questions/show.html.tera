@@ -1,4 +1,4 @@
-{% extends "layout" %}
+{% extends "admin/layout" %}
 
 {% block main %}
 <section class='admin-question-show'>

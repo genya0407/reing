@@ -1,0 +1,7 @@
+{% extends "layout" %}
+
+{% block header %}
+<a href='/admin'>
+    <img src='/static/image/logo.png' />
+</a>
+{% endblock header %}
