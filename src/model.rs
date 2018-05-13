@@ -111,7 +111,10 @@ impl Repository {
                 });
         }
 
-        q_map.into_iter().map(|(_,v)| v).collect::<Vec<Question>>()
+        let mut result = q_map.into_iter().map(|(_,v)| v).collect::<Vec<Question>>();
+        result.sort_by_key(|q| q.created_at);
+        result.reverse();
+        return result;
     }
 
     fn row2question(&self, q: db::Question) -> Question {
