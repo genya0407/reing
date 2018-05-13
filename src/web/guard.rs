@@ -82,3 +82,22 @@ impl<'a, 'r> FromRequest<'a, 'r> for BasicAuth {
         Outcome::Failure((Status::Unauthorized, ()))
     }
 }
+
+/* Guard Force SSL */
+// Depends on heroku (X-Forwarded-Proto)
+
+pub struct ForceSSL();
+
+impl<'a, 'r> FromRequest<'a, 'r> for ForceSSL {
+    type Error = ();
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
+        if let Some(schema) = request.headers().get("X-Forwarded-Proto").next() {
+            if schema == String::from("http") {
+                return Outcome::Success(ForceSSL());
+            }
+        }
+
+        Outcome::Forward(())
+    }
+}
