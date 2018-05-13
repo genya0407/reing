@@ -12,15 +12,29 @@
 
 
     <div class='answer-form'>
-        <form action='/admin/question/{{ id }}/answer' method='POST'>
+        <form action='/admin/question/{{ id }}/answer' method='POST' id='answer-form'>
             <div>
-                <textarea name='body'></textarea>
+                <textarea name='body' onKeyUp="answerChanged(value)"></textarea>
+                <div class='character-count'><span id='current-character-count'>0</span>/110文字</div>
             </div>
 
             <div class='submit-button'>
-                <button type='submit'>回答する</button>
+                <button type='submit' id='submit-button'>回答する</button>
             </div>
         </form>
     </div>
+
+    <script type='text/javascript'>
+        function answerChanged(text) {
+            document.getElementById('current-character-count').textContent = text.length;
+
+            const submit_button = document.getElementById('submit-button');
+            if (text.length > 110) {
+                submit_button.disabled = true;
+            } else {
+                submit_button.disabled = false;
+            }
+        }
+    </script>
 </section>
 {% endblock main %}
