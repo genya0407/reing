@@ -210,7 +210,7 @@ fn admin_post_answer(
     let answer_body = params.get().body.clone();
     if let Some(question) = repo.store_answer(id, answer_body.clone()) {
         let img = text2image::text2image(question.body);
-        tweet::tweet_answer(answer_body, img);
+        tweet::tweet_answer(id, answer_body, img);
     }
     response::Redirect::to("/admin")
 }

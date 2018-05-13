@@ -20,7 +20,7 @@ fn get_twitter_access_token() -> egg_mode::Token {
     }
 }
 
-pub fn tweet_answer(answer: String, question_image: image::RgbImage) {
+pub fn tweet_answer(question_id: i32, answer: String, question_image: image::RgbImage) {
     thread::spawn(move || {
         let mut core = Core::new().unwrap();
         let handle = core.handle();
@@ -35,7 +35,13 @@ pub fn tweet_answer(answer: String, question_image: image::RgbImage) {
         let builder = UploadBuilder::new(image_buf, media_types::image_jpg());
         let media_handle = core.run(builder.call(&token, &handle)).unwrap();
 
-        let draft = DraftTweet::new(answer)
+        let question_url = format!(
+            "https://{}/question/{}",
+            env::var("APPLICATION_DOMAIN").unwrap(),
+            question_id
+        );
+        let tweet_text = format!("{} {}", answer, question_url);
+        let draft = DraftTweet::new(tweet_text)
                         .media_ids(&[media_handle.id]);
         core.run(draft.send(&token, &handle)).unwrap();
     });
