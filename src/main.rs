@@ -120,29 +120,19 @@ struct PostQuestionForm {
 #[post("/questions", data = "<params>")]
 fn post_question(repo: web::guard::Repository, client_ip: web::guard::ClientIP, params: request::Form<PostQuestionForm>)
      -> response::Redirect {
-    let question = repo.store_question(params.get().body.clone(), client_ip.address());
-    response::Redirect::to(&format!("/question/{}/after_post", question.id))
+    let _question = repo.store_question(params.get().body.clone(), client_ip.address());
+    response::Redirect::to("/question/after_post")
 }
-
 
 /* GET /question/<id> */
 
 #[derive(Serialize, Debug)]
-struct AfterPostQuestionDTO {
-    pub question: QuestionDTO
-}
+struct AfterPostQuestionDTO{}
 
-#[get("/question/<id>/after_post")]
-fn after_post_question(id: i32, repo: web::guard::Repository) -> Result<Template, response::Redirect> {
-    match repo.find_question(id) {
-        Some(question) => {
-            let context = AfterPostQuestionDTO {
-                question: QuestionDTO::from(question),
-            };
-            Ok(Template::render("question/after_post", &context))
-        },
-        None => Err(response::Redirect::to("/"))
-    }
+#[get("/question/after_post")]
+fn after_post_question() -> Template {
+    let context = AfterPostQuestionDTO{};
+    Template::render("question/after_post", &context)
 }
 
 /* GET /admin */
