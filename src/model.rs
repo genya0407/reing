@@ -76,6 +76,15 @@ impl Repository {
         self.qas2questions(qas)
     }
 
+    pub fn not_answered_questions(&self) -> Vec<Question> {
+        let qas = questions::table
+                .left_join(answers::table)
+                .filter(answers::id.is_null())
+                .load::<(db::Question, Option<db::Answer>)>(self.conn())
+                .unwrap();
+        self.qas2questions(qas)                
+    }
+
     pub fn find_question(&self, id: i32) -> Option<Question> {
         let qas = questions::table
                 .left_join(answers::table)

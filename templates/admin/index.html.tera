@@ -1,0 +1,9 @@
+{% extends "layout" %}
+
+{% block main %}
+{% for q in questions %}
+    <ul>
+        <li><a href='/admin/question/{{q.id}}'>{{q.body}}</a></li>
+    </ul>
+{% endfor %}
+{% endblock main %}

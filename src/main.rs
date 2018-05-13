@@ -37,17 +37,6 @@ mod db;
 mod text2image;
 mod tweet;
 
-/* GET /static/ */
-
-#[get("/static/<file..>")]
-fn files(file: PathBuf) -> Result<response::NamedFile, status::NotFound<String>> {
-    let path = Path::new("static/").join(file);
-    response::NamedFile::open(&path)
-        .map_err(|_| status::NotFound(format!("Bad path: {:?}", path)))
-}
-
-/* GET / */
-
 #[derive(Serialize, Debug)]
 struct AnswerDTO {
     pub id: i32,
@@ -83,15 +72,36 @@ impl QuestionDTO {
     }
 }
 
+/* GET /static/ */
+
+#[get("/static/<file..>")]
+fn files(file: PathBuf) -> Result<response::NamedFile, status::NotFound<String>> {
+    let path = Path::new("static/").join(file);
+    response::NamedFile::open(&path)
+        .map_err(|_| status::NotFound(format!("Bad path: {:?}", path)))
+}
+
+/* GET / */
+
 #[derive(Serialize, Debug)]
 struct IndexDTO {
-    pub questions: Vec<QuestionDTO>
+    pub profile: ProfileDTO
+}
+
+#[derive(Serialize, Debug)]
+struct ProfileDTO {
+    pub username: String,
+    pub image_url: String,
 }
 
 #[get("/")]
-fn index(repo: web::guard::Repository) -> Template {
-    let question_dtos = repo.all_questions().into_iter().map(|q| QuestionDTO::from(q)).collect::<Vec<_>>();
-    let context = IndexDTO { questions: question_dtos };
+fn index() -> Template {
+    let context = IndexDTO {
+        profile: ProfileDTO {
+            username: env::var("PROFILE_USERNAME").unwrap(),
+            image_url: env::var("PROFILE_IMAGE_URL").unwrap()
+        }
+    };
     Template::render("index", &context)
 }
 
@@ -108,6 +118,22 @@ fn post_question(repo: web::guard::Repository, client_ip: web::guard::ClientIP, 
     let _question = repo.store_question(params.get().body.clone(), client_ip.address());
     //response::Redirect::to(&format!("/question/{}", question.id))
     response::Redirect::to("/")
+}
+
+#[derive(Serialize, Debug)]
+struct AdminIndexDTO {
+    pub questions: Vec<QuestionDTO>
+}
+
+/* GET /admin */
+#[get("/admin")]
+fn admin_index(repo: web::guard::Repository, _auth: web::guard::BasicAuth) -> Template {
+    let question_dtos = repo.not_answered_questions()
+                            .into_iter()
+                            .map(|q| QuestionDTO::from(q))
+                            .collect::<Vec<_>>();
+    let context = AdminIndexDTO { questions: question_dtos };
+    Template::render("admin/index", &context)
 }
 
 /* GET /admin/question/<id> */
@@ -172,7 +198,8 @@ fn main() {
     rocket::ignite()
         .manage(pool)
         .mount("/", routes![
-            index, files, post_question, admin_post_answer, admin_show_question
+            index, files, post_question,
+            admin_index, admin_post_answer, admin_show_question
         ])
         .catch(errors![unauthorized])
         .attach(Template::fairing())

@@ -4,6 +4,11 @@
         <link rel="stylesheet" type="text/css" href="/static/css/application.css">
     </head>
     <body>
+        <header>
+            <a href='/'>
+                <img src='/static/image/logo.png' />
+            </a>
+        </header>
         <main>
             {% block main %}{% endblock main %}
         </main>

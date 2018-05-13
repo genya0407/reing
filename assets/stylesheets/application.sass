@@ -1,6 +1,87 @@
+$bg-color: #f2f2f0
+$feature-color: #2c365d
+$pale-black: #777
+
+@mixin shadow()
+  box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.05)
+
+@mixin card()
+  @include shadow()
+  padding: 20px
+
+@mixin radius-card()
+  @include card()
+  border-radius: 10px
+
 body
-  background-color: gray
+  margin-top: 0px
+  background-color: $bg-color
+  margin-left: 0px
+  margin-right: 0px
+  color: $pale-black
+
+header
+  margin-top: 0px
+  margin-bottom: 20px
+  height: 45px
+  background-color: white
+  text-align: center
+  @include shadow()
+
+  & div
+    height: 100%
 
 main
-  max-width: 800px
-  background-color: white
+  max-width: 600px
+  margin: auto
+
+section.index
+  & p
+    text-align: center
+
+  & .profile
+    margin-bottom: 20px
+    text-align: center
+
+    & .header
+      background-color: $feature-color
+
+      & img
+        width: 100px
+        margin: 10px
+        border-radius: 50%
+
+    & .content
+      background-color: white
+      height: 50px
+      padding: 10px
+      & p
+        margin: auto
+
+  & .question-form
+    max-width: 400px
+    width: 90%
+    margin: auto
+
+    & textarea
+      width: 100%
+      height: 200px
+      box-sizing: border-box
+      border-radius: 20px
+      border: 2px solid $feature-color
+      padding: 20px
+      font-size: 16px
+      color: $pale-black
+
+    & .submit-button
+      margin-top: 20px
+      text-align: center
+
+      & button
+        font-size: 20px
+        padding: 10px 20px 10px 20px
+        border-radius: 10px
+        background-color: white
+        border: 2px solid $feature-color
+        color: $pale-black
+
