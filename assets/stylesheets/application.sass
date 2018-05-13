@@ -70,13 +70,27 @@ div.question-form
       border: 2px solid $feature-color
       color: $pale-black
 
+div.question-wrapper
+  margin-bottom: 20px
+  & a
+    text-decoration: none
+    color: $pale-black
+    & div.question
+      background-color: white
+      @include radius-card()
+      & p
+        text-align: left
+        white-space: pre-wrap
+        margin-bottom: 0px
+
+div.one-more-question
+  & p
+    text-align: center
+    margin-bottom: 0px
+
 section.after_post
   & p
     text-align: center
-
-  & .one-more-question
-    & p
-      margin-bottom: 0px
 
 section.index
   & p
@@ -101,23 +115,33 @@ section.index
       & p
         margin: auto
 
-section.admin-index
-  & div.question-wrapper
-    margin-bottom: 20px
-    & a
-      text-decoration: none
-      color: $pale-black
-      & div.question
-        background-color: white
-        @include radius-card()
-        & p
-          margin-bottom: 0px
+section.question-show
+  & div.answer-card
+    background-color: white
+    margin-bottom: 50px
+    @include radius-card()
+    color: black
+
+    & div.header
+      margin-bottom: 10px
+
+    & div.answer
+      margin-bottom: 30px
+      white-space: pre-wrap
+
+
+    & div.question
+      white-space: pre-wrap
+      border: 2px solid $feature-color
+      border-radius: 10px
+      padding: 20px
 
 section.admin-question-show
   & div.question
     background-color: white
     @include radius-card()
     & p
+      white-space: pre-wrap
       margin-bottom: 0px
 
 div.answer-form

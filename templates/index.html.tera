@@ -17,5 +17,19 @@
     <p><small>※質問文に絵文字を含めることはできません。</small></p>
 
     {% include "widget/question_form" %}
+
+    {% for q in answered_questions %}
+    <div class='question-wrapper'>
+        <a href='/question/{{q.id}}'>
+            <div class='question'>
+                <div class='header'>
+                    <span class='badge'>{{ q.created_at_recognizable }}</span>
+                </div>
+
+                <p>{{q.body}}</p>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
 </section>
 {% endblock main %}

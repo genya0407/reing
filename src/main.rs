@@ -90,7 +90,8 @@ fn files(file: PathBuf) -> Result<response::NamedFile, status::NotFound<String>>
 
 #[derive(Serialize, Debug)]
 struct IndexDTO {
-    pub profile: ProfileDTO
+    pub profile: ProfileDTO,
+    pub answered_questions: Vec<QuestionDTO>,
 }
 
 #[derive(Serialize, Debug)]
@@ -100,12 +101,16 @@ struct ProfileDTO {
 }
 
 #[get("/")]
-fn index() -> Template {
+fn index(repo: web::guard::Repository) -> Template {
     let context = IndexDTO {
         profile: ProfileDTO {
             username: env::var("PROFILE_USERNAME").unwrap(),
             image_url: env::var("PROFILE_IMAGE_URL").unwrap()
-        }
+        },
+        answered_questions: repo.answered_questions()
+                                .into_iter()
+                                .map(|q| QuestionDTO::from(q))
+                                .collect::<Vec<_>>(),
     };
     Template::render("index", &context)
 }
@@ -124,7 +129,7 @@ fn post_question(repo: web::guard::Repository, client_ip: web::guard::ClientIP, 
     response::Redirect::to("/question/after_post")
 }
 
-/* GET /question/<id> */
+/* GET /question/after_post */
 
 #[derive(Serialize, Debug)]
 struct AfterPostQuestionDTO{}
@@ -133,6 +138,25 @@ struct AfterPostQuestionDTO{}
 fn after_post_question() -> Template {
     let context = AfterPostQuestionDTO{};
     Template::render("question/after_post", &context)
+}
+
+/* GET /question/<id> */
+
+#[derive(Serialize, Debug)]
+struct ShowQuestionDTO {
+    pub question: QuestionDTO
+}
+
+#[get("/question/<id>")]
+fn show_question(id: i32, repo: web::guard::Repository) -> Result<Template, status::NotFound<&'static str>> {
+    if let Some(question) = repo.find_question(id) {
+        if question.answered() {
+            let context = ShowQuestionDTO { question: QuestionDTO::from(question) };
+            return Ok(Template::render("question/show", &context));
+        }
+    }
+
+    return Err(status::NotFound("not found"));
 }
 
 /* GET /admin */
@@ -214,7 +238,7 @@ fn main() {
     rocket::ignite()
         .manage(pool)
         .mount("/", routes![
-            index, files, post_question, after_post_question,
+            index, files, post_question, after_post_question, show_question,
             admin_index, admin_post_answer, admin_show_question
         ])
         .catch(errors![unauthorized])

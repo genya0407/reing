@@ -1,0 +1,22 @@
+{% extends "layout" %}
+
+{% block main %}
+<section class='question-show'>
+    {% for a in question.answers %}
+        <div class='answer-card'>
+            <div class='header'>
+                <span class='badge'>{{ question.created_at_recognizable }}</span>
+            </div>
+
+            <div class='answer'>{{ a.body }}</div>
+
+            <div class='question'>{{ question.body }}</div>
+        </div>
+    {% endfor %}
+
+    <div class='one-more-question'>
+        <p><small>他の質問を投稿する</small></p>
+        {% include "widget/question_form" %}
+    </div>
+</section>
+{% endblock main %}

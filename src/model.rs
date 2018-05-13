@@ -22,6 +22,12 @@ pub struct Question {
     pub answers: Vec<Answer>,
 }
 
+impl Question {
+    pub fn answered(&self) -> bool {
+        return !self.answers.is_empty()
+    }
+}
+
 #[derive(Debug)]
 pub struct Answer {
     pub id: i32,
@@ -68,9 +74,10 @@ impl Repository {
         })
     }
 
-    pub fn all_questions(&self) -> Vec<Question> {
+    pub fn answered_questions(&self) -> Vec<Question> {
         let qas = questions::table
                 .left_join(answers::table)
+                .filter(answers::id.is_not_null())
                 .load::<(db::Question, Option<db::Answer>)>(self.conn())
                 .unwrap();
         self.qas2questions(qas)

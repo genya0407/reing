@@ -51,10 +51,27 @@ div.question-form {
       border: 2px solid #2c365d;
       color: #777; }
 
+div.question-wrapper {
+  margin-bottom: 20px; }
+  div.question-wrapper a {
+    text-decoration: none;
+    color: #777; }
+    div.question-wrapper a div.question {
+      background-color: white;
+      box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.05);
+      padding: 15px;
+      border-radius: 10px; }
+      div.question-wrapper a div.question p {
+        text-align: left;
+        white-space: pre-wrap;
+        margin-bottom: 0px; }
+
+div.one-more-question p {
+  text-align: center;
+  margin-bottom: 0px; }
+
 section.after_post p {
   text-align: center; }
-section.after_post .one-more-question p {
-  margin-bottom: 0px; }
 
 section.index p {
   text-align: center; }
@@ -74,18 +91,23 @@ section.index .profile {
     section.index .profile .content p {
       margin: auto; }
 
-section.admin-index div.question-wrapper {
-  margin-bottom: 20px; }
-  section.admin-index div.question-wrapper a {
-    text-decoration: none;
-    color: #777; }
-    section.admin-index div.question-wrapper a div.question {
-      background-color: white;
-      box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.05);
-      padding: 15px;
-      border-radius: 10px; }
-      section.admin-index div.question-wrapper a div.question p {
-        margin-bottom: 0px; }
+section.question-show div.answer-card {
+  background-color: white;
+  margin-bottom: 50px;
+  box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.05);
+  padding: 15px;
+  border-radius: 10px;
+  color: black; }
+  section.question-show div.answer-card div.header {
+    margin-bottom: 10px; }
+  section.question-show div.answer-card div.answer {
+    margin-bottom: 30px;
+    white-space: pre-wrap; }
+  section.question-show div.answer-card div.question {
+    white-space: pre-wrap;
+    border: 2px solid #2c365d;
+    border-radius: 10px;
+    padding: 20px; }
 
 section.admin-question-show div.question {
   background-color: white;
@@ -93,6 +115,7 @@ section.admin-question-show div.question {
   padding: 15px;
   border-radius: 10px; }
   section.admin-question-show div.question p {
+    white-space: pre-wrap;
     margin-bottom: 0px; }
 
 div.answer-form {
