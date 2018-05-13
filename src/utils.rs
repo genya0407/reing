@@ -5,7 +5,9 @@ pub fn recognizable_datetime(datetime: DateTime<Local>) -> String {
     let now = Local::now();
     let duration = now.signed_duration_since(datetime);
 
-    if duration < Duration::minutes(1) {
+    if duration < Duration::seconds(1) {
+        String::from("今")
+    } else if duration < Duration::minutes(1) {
         format!("{}秒前", duration.num_seconds())
     } else if duration < Duration::hours(1) {
         format!("{}分前", duration.num_minutes())
