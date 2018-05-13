@@ -36,18 +36,21 @@ mod model;
 mod db;
 mod text2image;
 mod tweet;
+mod utils;
 
 #[derive(Serialize, Debug)]
 struct AnswerDTO {
     pub id: i32,
     pub body: String,
     pub created_at: DateTime<Local>,
+    pub created_at_recognizable: String,
 }
 
 impl AnswerDTO {
     fn from(a: model::Answer) -> Self {
         Self {
-            id: a.id, body: a.body, created_at: a.created_at
+            id: a.id, body: a.body, created_at: a.created_at,
+            created_at_recognizable: utils::recognizable_datetime(a.created_at)
         }
     }
 }
@@ -59,6 +62,7 @@ struct QuestionDTO {
     pub ip_address: String,
     pub hidden: bool,
     pub created_at: DateTime<Local>,
+    pub created_at_recognizable: String,
     pub answers: Vec<AnswerDTO>
 }
 
@@ -67,7 +71,8 @@ impl QuestionDTO {
         Self {
             id: q.id, body: q.body, ip_address: q.ip_address,
             hidden: q.hidden, created_at: q.created_at,
-            answers: q.answers.into_iter().map(|a| AnswerDTO::from(a)).collect::<Vec<_>>()
+            answers: q.answers.into_iter().map(|a| AnswerDTO::from(a)).collect::<Vec<_>>(),
+            created_at_recognizable: utils::recognizable_datetime(q.created_at)
         }
     }
 }
@@ -115,17 +120,38 @@ struct PostQuestionForm {
 #[post("/questions", data = "<params>")]
 fn post_question(repo: web::guard::Repository, client_ip: web::guard::ClientIP, params: request::Form<PostQuestionForm>)
      -> response::Redirect {
-    let _question = repo.store_question(params.get().body.clone(), client_ip.address());
-    //response::Redirect::to(&format!("/question/{}", question.id))
-    response::Redirect::to("/")
+    let question = repo.store_question(params.get().body.clone(), client_ip.address());
+    response::Redirect::to(&format!("/question/{}/after_post", question.id))
 }
+
+
+/* GET /question/<id> */
+
+#[derive(Serialize, Debug)]
+struct AfterPostQuestionDTO {
+    pub question: QuestionDTO
+}
+
+#[get("/question/<id>/after_post")]
+fn after_post_question(id: i32, repo: web::guard::Repository) -> Result<Template, response::Redirect> {
+    match repo.find_question(id) {
+        Some(question) => {
+            let context = AfterPostQuestionDTO {
+                question: QuestionDTO::from(question),
+            };
+            Ok(Template::render("question/after_post", &context))
+        },
+        None => Err(response::Redirect::to("/"))
+    }
+}
+
+/* GET /admin */
 
 #[derive(Serialize, Debug)]
 struct AdminIndexDTO {
     pub questions: Vec<QuestionDTO>
 }
 
-/* GET /admin */
 #[get("/admin")]
 fn admin_index(repo: web::guard::Repository, _auth: web::guard::BasicAuth) -> Template {
     let question_dtos = repo.not_answered_questions()
@@ -198,7 +224,7 @@ fn main() {
     rocket::ignite()
         .manage(pool)
         .mount("/", routes![
-            index, files, post_question,
+            index, files, post_question, after_post_question,
             admin_index, admin_post_answer, admin_show_question
         ])
         .catch(errors![unauthorized])

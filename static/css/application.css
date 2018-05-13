@@ -19,6 +19,35 @@ main {
   max-width: 600px;
   margin: auto; }
 
+div.question-form {
+  max-width: 400px;
+  width: 90%;
+  margin: auto; }
+  div.question-form textarea {
+    width: 100%;
+    height: 200px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    border: 2px solid #2c365d;
+    padding: 20px;
+    font-size: 16px;
+    color: #777; }
+  div.question-form .submit-button {
+    margin-top: 20px;
+    text-align: center; }
+    div.question-form .submit-button button {
+      font-size: 20px;
+      padding: 10px 20px 10px 20px;
+      border-radius: 10px;
+      background-color: white;
+      border: 2px solid #2c365d;
+      color: #777; }
+
+section.after_post p {
+  text-align: center; }
+section.after_post .one-more-question p {
+  margin-bottom: 0px; }
+
 section.index p {
   text-align: center; }
 section.index .profile {
@@ -36,28 +65,5 @@ section.index .profile {
     padding: 10px; }
     section.index .profile .content p {
       margin: auto; }
-section.index .question-form {
-  max-width: 400px;
-  width: 90%;
-  margin: auto; }
-  section.index .question-form textarea {
-    width: 100%;
-    height: 200px;
-    box-sizing: border-box;
-    border-radius: 20px;
-    border: 2px solid #2c365d;
-    padding: 20px;
-    font-size: 16px;
-    color: #777; }
-  section.index .question-form .submit-button {
-    margin-top: 20px;
-    text-align: center; }
-    section.index .question-form .submit-button button {
-      font-size: 20px;
-      padding: 10px 20px 10px 20px;
-      border-radius: 10px;
-      background-color: white;
-      border: 2px solid #2c365d;
-      color: #777; }
 
 /*# sourceMappingURL=application.css.map */

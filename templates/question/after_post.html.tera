@@ -1,0 +1,12 @@
+{% extends "layout" %}
+
+{% block main %}
+<section class='after_post'>
+    <p>質問が投稿されました！</p>
+
+    <div class='one-more-question'>
+        <p><small>他の質問を投稿する</small></p>
+        {% include "widget/question_form" %}
+    </div>
+</section>
+{% endblock main %}

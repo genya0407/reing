@@ -35,6 +35,41 @@ main
   max-width: 600px
   margin: auto
 
+div.question-form
+  max-width: 400px
+  width: 90%
+  margin: auto
+
+  & textarea
+    width: 100%
+    height: 200px
+    box-sizing: border-box
+    border-radius: 20px
+    border: 2px solid $feature-color
+    padding: 20px
+    font-size: 16px
+    color: $pale-black
+
+  & .submit-button
+    margin-top: 20px
+    text-align: center
+
+    & button
+      font-size: 20px
+      padding: 10px 20px 10px 20px
+      border-radius: 10px
+      background-color: white
+      border: 2px solid $feature-color
+      color: $pale-black
+
+section.after_post
+  & p
+    text-align: center
+
+  & .one-more-question
+    & p
+      margin-bottom: 0px
+
 section.index
   & p
     text-align: center
@@ -57,31 +92,3 @@ section.index
       padding: 10px
       & p
         margin: auto
-
-  & .question-form
-    max-width: 400px
-    width: 90%
-    margin: auto
-
-    & textarea
-      width: 100%
-      height: 200px
-      box-sizing: border-box
-      border-radius: 20px
-      border: 2px solid $feature-color
-      padding: 20px
-      font-size: 16px
-      color: $pale-black
-
-    & .submit-button
-      margin-top: 20px
-      text-align: center
-
-      & button
-        font-size: 20px
-        padding: 10px 20px 10px 20px
-        border-radius: 10px
-        background-color: white
-        border: 2px solid $feature-color
-        color: $pale-black
-
