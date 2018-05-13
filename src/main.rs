@@ -81,6 +81,7 @@ impl QuestionDTO {
 #[get("/<path..>")]
 fn redirect_ssl(path: PathBuf, _ssl: web::guard::ForceSSL) -> response::Redirect {
     let redirect_to = format!("https://{}/{}", env::var("APPLICATION_DOMAIN").unwrap(), path.as_path().display());
+    println!("Redirect to:{}", redirect_to);
     response::Redirect::to(&redirect_to)
 }
 
