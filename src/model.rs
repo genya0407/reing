@@ -120,7 +120,6 @@ impl Repository {
 
         let mut result = q_map.into_iter().map(|(_,v)| v).collect::<Vec<Question>>();
         result.sort_by_key(|q| q.created_at);
-        result.reverse();
         return result;
     }
 
