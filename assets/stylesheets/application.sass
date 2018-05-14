@@ -93,6 +93,21 @@ section.after_post
   & p
     text-align: center
 
+  & div.question-card
+    background-color: white
+    margin-bottom: 50px
+    @include radius-card()
+    color: black
+
+    & div.header
+      margin-bottom: 10px
+
+    & div.question
+      white-space: pre-wrap
+      border: 2px solid $feature-color
+      border-radius: 10px
+      padding: 20px
+
 section.index
   & p
     text-align: center

@@ -4,6 +4,14 @@
 <section class='after_post'>
     <p>質問が投稿されました！</p>
 
+    <div class='question-card'>
+        <div class='header'>
+            <span class='badge'>{{ question.created_at_recognizable }}</span>
+        </div>
+
+        <div class='question'>{{ question.body }}</div>
+    </div>
+
     <div class='one-more-question'>
         <p><small>他の質問を投稿する</small></p>
         {% include "widget/question_form" %}

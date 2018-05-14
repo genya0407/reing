@@ -12,7 +12,7 @@ use db::schema::{questions, answers};
 
 type DieselConnection = r2d2::PooledConnection<r2d2_diesel::ConnectionManager<diesel::PgConnection>>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Question {
     pub id: i32,
     pub body: String,
@@ -28,7 +28,7 @@ impl Question {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Answer {
     pub id: i32,
     pub body: String,

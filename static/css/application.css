@@ -73,6 +73,20 @@ div.one-more-question p {
 
 section.after_post p {
   text-align: center; }
+section.after_post div.question-card {
+  background-color: white;
+  margin-bottom: 50px;
+  box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.05);
+  padding: 15px;
+  border-radius: 10px;
+  color: black; }
+  section.after_post div.question-card div.header {
+    margin-bottom: 10px; }
+  section.after_post div.question-card div.question {
+    white-space: pre-wrap;
+    border: 2px solid #2c365d;
+    border-radius: 10px;
+    padding: 20px; }
 
 section.index p {
   text-align: center; }
