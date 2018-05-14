@@ -20,6 +20,8 @@ extern crate tokio_core;
 extern crate image;
 extern crate imageproc;
 extern crate rusttype;
+extern crate lettre;
+extern crate lettre_email;
 
 use std::env;
 use std::path::{Path, PathBuf};
@@ -37,6 +39,7 @@ mod db;
 mod text2image;
 mod tweet;
 mod utils;
+mod notify;
 
 #[derive(Serialize, Debug)]
 struct AnswerDTO {
@@ -133,7 +136,8 @@ struct PostQuestionForm {
 #[post("/questions", data = "<params>")]
 fn post_question(repo: web::guard::Repository, client_ip: web::guard::ClientIP, params: request::Form<PostQuestionForm>)
      -> response::Redirect {
-    let _question = repo.store_question(params.get().body.clone(), client_ip.address());
+    let question = repo.store_question(params.get().body.clone(), client_ip.address());
+    notify::send_email(question);
     response::Redirect::to("/question/after_post")
 }
 
