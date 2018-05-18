@@ -18,8 +18,8 @@ pub fn send_email(question: model::Question) {
             .subject("質問が投稿されました")
             .html(
                 format!(
-                    "<p>質問が投稿されました</p><p><a href='{}'>{}</a>",
-                    question_url, question_url
+                    "<p>質問が投稿されました</p><p>{}</p><p><a href='{}'>{}</a>",
+                    question.body, question_url, question_url
                 )
             )
             .build()
