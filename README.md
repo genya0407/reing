@@ -101,3 +101,38 @@ $ heroku run ./bin/diesel migration run
 - `DATABASE_URL`
   - 例: `postgresql://username:password@127.0.0.1:5432/database-name`
   - **Herokuを使う場合は設定する必要はありません**
+
+## How to develop
+
+ローカル環境での動かし方について述べます。
+
+### Rustの環境を作る
+
+[rustup](https://rustup.rs/) などを使ってRustの環境を作ります。
+
+開発に使われているコンパイラのバージョンは[RustConfig](./RustConfig)に書いてあります。
+
+### PostgreSQLサーバーを立てる
+
+何らかの手段でPostgreSQLサーバーを立てます。
+
+オススメは[./scripts/launch_db.sh](./scripts/launch_db.sh) を使ってDockerでサーバーを立てることです。
+
+### 環境変数を設定する
+
+前節で説明した環境変数を設定します。
+
+実行時にターミナルから与えても良いですが、 `.env` で環境変数を設定することができます。
+
+```
+$ cp .env.sample .env
+$ vim .env
+```
+
+環境変数の内容自体は、前節のものと同じです。
+
+## How to contribute
+
+もし機能追加などをしてくださる奇特な方がいらっしゃれば大歓迎です。
+
+適当にForkしてPull Requestを投げつけてください。
