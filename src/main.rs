@@ -137,8 +137,9 @@ struct PostQuestionForm {
 fn post_question(repo: web::guard::Repository, client_ip: web::guard::ClientIP, params: request::Form<PostQuestionForm>)
      -> response::Redirect {
     let question = repo.store_question(params.get().body.clone(), client_ip.address());
-    notify::send_email(question.clone());
-    response::Redirect::to(&format!("/question/{}/after_post", question.id))
+    let question_id = question.id;
+    notify::send_email(question);
+    response::Redirect::to(&format!("/question/{}/after_post", question_id))
 }
 
 /* GET /question/after_post */
