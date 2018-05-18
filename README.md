@@ -37,7 +37,7 @@ $ heroku run ./bin/diesel migration run
 
 ### 環境変数を設定する
 
-以下の環境変数を設定します。
+以下の環境変数を設定します。設定例が[./.env.sample](./.env.sample)にあります。
 
 ※herokuでは `heroku config:set KEY=VALUE` で環境変数を設定することができます。
 
