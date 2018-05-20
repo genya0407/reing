@@ -1,1 +1,1 @@
-docker run --rm -v /var/lib/postgresql/data -e POSTGRES_USER=reing -e POSTGRES_PASSWORD=reing -p 5432:5432 --name reing-postgres -d postgres:9.6-alpine
+docker run --rm -v /var/lib/postgresql/data -e POSTGRES_USER=reing -e POSTGRES_PASSWORD=reing -p 5432:5432 --name reing-postgres -d postgres:10-alpine
