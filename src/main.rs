@@ -113,15 +113,17 @@ struct ProfileDTO {
 
 #[get("/")]
 fn index(repo: web::guard::Repository) -> Template {
+    let mut question_dtos = repo.answered_questions()
+                                .into_iter()
+                                .map(|q| QuestionDTO::from(q))
+                                .collect::<Vec<_>>();
+    question_dtos.reverse();
     let context = IndexDTO {
         profile: ProfileDTO {
             username: env::var("PROFILE_USERNAME").unwrap(),
             image_url: env::var("PROFILE_IMAGE_URL").unwrap()
         },
-        answered_questions: repo.answered_questions()
-                                .into_iter()
-                                .map(|q| QuestionDTO::from(q))
-                                .collect::<Vec<_>>(),
+        answered_questions: question_dtos,
     };
     Template::render("index", &context)
 }
