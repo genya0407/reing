@@ -4,7 +4,6 @@ use r2d2_diesel;
 use diesel;
 use base64;
 use std::ops::Deref;
-use std::net::SocketAddr;
 use std::env;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
@@ -38,14 +37,11 @@ impl<'a, 'r> FromRequest<'a, 'r> for Repository {
 
 /* Guard Client IP address */
 
-pub struct ClientIP(pub SocketAddr);
+pub struct ClientIP(pub String);
 
 impl ClientIP {
-    pub fn address(&self) -> String {
-        match self.0 {
-            SocketAddr::V4(v4) => format!("{}", v4.ip()),
-            SocketAddr::V6(v6) => format!("{}", v6.ip())
-        }
+    pub fn address(self) -> String {
+        self.0
     }
 }
 
@@ -53,10 +49,17 @@ impl<'a, 'r> FromRequest<'a, 'r> for ClientIP {
     type Error = ();
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
-        match request.remote() {
-            Some(socket_addr) => Outcome::Success(ClientIP(socket_addr)),
-            None => Outcome::Failure((Status::ServiceUnavailable, ()))
-        }
+        let ip_address = if let Some(x_forwarded_for) = request.headers().get("x-forwarded-for").next() {
+            if let Some(ip_address) = x_forwarded_for.split(',').last() {
+                ip_address.to_string()
+            } else {
+                String::from("")
+            }
+        } else {
+            String::from("")
+        };
+
+        Outcome::Success(ClientIP(ip_address))
     }
 }
 
