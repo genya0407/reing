@@ -39,6 +39,10 @@ pub struct Repository {
     pooled_connection: DieselConnection
 }
 
+pub enum StoreQuestionError {
+    BlankBody
+}
+
 impl Repository {
     pub fn new(pooled_connection: DieselConnection) -> Self {
         Self { pooled_connection: pooled_connection }
@@ -48,14 +52,18 @@ impl Repository {
         self.pooled_connection.deref()
     }
 
-    pub fn store_question(&self, body: String, ip_address: String) -> Question {
-        let new_question = db::NewQuestion { body: body, ip_address: ip_address };
+    pub fn store_question(&self, body: String, ip_address: String) -> Result<Question, StoreQuestionError> {
+        if body.chars().all(|c| char::is_whitespace(c)) {
+            Err(StoreQuestionError::BlankBody)
+        } else {
+            let new_question = db::NewQuestion { body: body, ip_address: ip_address };
 
-        let q: db::Question = diesel::insert_into(questions::table)
-                .values(&new_question)
-                .get_result(self.conn())
-                .expect("Error saving new question");
-        self.qas2questions(vec![(q, None)]).into_iter().next().unwrap()
+            let q: db::Question = diesel::insert_into(questions::table)
+                    .values(&new_question)
+                    .get_result(self.conn())
+                    .expect("Error saving new question");
+            Ok(self.qas2questions(vec![(q, None)]).into_iter().next().unwrap())
+        }
     }
 
     pub fn store_answer(&self, id: i32, body: String) -> Option<Question> {

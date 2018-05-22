@@ -135,13 +135,29 @@ struct PostQuestionForm {
     body: String
 }
 
+#[derive(Serialize, Debug)]
+struct PostQuestionFailedDTO {
+    reason: String
+}
+
 #[post("/questions", data = "<params>")]
 fn post_question(repo: web::guard::Repository, client_ip: web::guard::ClientIP, params: request::Form<PostQuestionForm>)
-     -> response::Redirect {
-    let question = repo.store_question(params.get().body.clone(), client_ip.address());
-    let question_id = question.id;
-    notify::send_email(question);
-    response::Redirect::to(&format!("/question/{}/after_post", question_id))
+     -> Result<response::Redirect, Template> {
+    match repo.store_question(params.get().body.clone(), client_ip.address()) {
+        Ok(question) => {
+            let question_id = question.id;
+            notify::send_email(question);
+            Ok(response::Redirect::to(&format!("/question/{}/after_post", question_id)))
+        },
+        Err(err) => {
+            match err {
+                model::StoreQuestionError::BlankBody => {
+                    let context = PostQuestionFailedDTO { reason: String::from("質問の内容が空です") };
+                    Err(Template::render("question/post_failed", &context))
+                }
+            }
+        }
+    }
 }
 
 /* GET /question/after_post */

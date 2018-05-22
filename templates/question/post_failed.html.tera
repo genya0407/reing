@@ -1,0 +1,14 @@
+{% extends "layout" %}
+
+{% block main %}
+<section class='post_failed'>
+    <p>質問の投稿に失敗しました</p>
+
+    <p>理由：{{reason}}</p>
+
+    <div class='one-more-question'>
+        <p><small>他の質問を投稿する</small></p>
+        {% include "widget/question_form" %}
+    </div>
+</section>
+{% endblock main %}

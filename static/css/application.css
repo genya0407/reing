@@ -88,6 +88,9 @@ section.after_post div.question-card {
     border-radius: 10px;
     padding: 20px; }
 
+section.post_failed p {
+  text-align: center; }
+
 section.index p {
   text-align: center; }
 section.index .profile {
