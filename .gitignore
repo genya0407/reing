@@ -2,4 +2,5 @@
 **/*.rs.bk
 .sass-cache
 .env
-test.png
+test_images/*
+!test_images/.keep

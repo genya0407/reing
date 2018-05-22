@@ -7,8 +7,26 @@ use rusttype::{Font, FontCollection, Scale};
 #[test]
 fn text2image_test() {
     use std::path::Path;
-    let img = text2image(String::from("私はその人を常に先生と呼んでいた。\nだからここでもただ先生と書くだけで本名はuchiaけない。これは世間を憚かる遠慮というよりも、その方が私にとって自然だからである。\n私はその人の記憶を呼び起すごとに、すぐ「先生」といいたくなる。\n筆を執っても心持は同じ事である。\nよそよそしい頭文字などはとても使う気にならない。"));
-    img.save(Path::new("test.png")).unwrap();
+    let original_text = vec![
+        "私はその人を常に先生と呼んでいた。",
+        "だからここでもただ先生と書くだけで本名は打ち明けない。",
+        "これは世間を憚かる遠慮というよりも、その方が私にとって自然だからである。",
+        "私はその人の記憶を呼び起すごとに、すぐ「先生」といいたくなる。",
+        "筆を執っても心持は同じ事である。",
+        "よそよそしい頭文字などは",
+        "とても使う気にならない。",
+        "私が先生と知り合いになったのは鎌倉である。",
+        "その時私はまだ若々しい書生であった。",
+        "暑中休暇を利用して海水浴に行った友達からぜひ来いという端書を受け取ったので、私は多少の金を工面して、出掛ける事にした。",
+        "私は金の工面に二、三日を費やした。",
+        "ところが私が鎌倉に着いて三日と経たないうちに、私を呼び寄せた友達は、急に国元から帰れという電報を受け取った。",
+        "電報には母が病気だからと断ってあったけれども友達はそれを信じなかった。",
+        "友達はかねてから国元にいる親たちに勧まない結婚を強いられていた。"
+    ];
+    for i in 0..original_text.len() {
+        let img = text2image(original_text[0..i].join("\n"));
+        img.save(Path::new(&format!("test_images/test{}.png", i))).unwrap();
+    }
 }
 
 pub fn text2image(text: String) -> image::RgbImage {
@@ -22,19 +40,23 @@ pub fn text2image(text: String) -> image::RgbImage {
     let wrapped_text = wrap_text(text, max_text_length);
 
     let text_height = (wrapped_text.len() as f32) * full_font_size;
+    let minimum_image_height = 344;
     let image_width = 600;
     let image_height = (50. + text_height + 90.) as u32;
+    let (image_height, text_start_at_x, text_start_at_y) = if image_height >= minimum_image_height {
+        (image_height, 50., 50.)
+    } else {
+        (minimum_image_height, 50., 50. + ((minimum_image_height - 140 - text_height as u32)/2) as f32)
+    };
     let mut image = RgbImage::from_pixel(image_width, image_height, Rgb([0x2c, 0x36, 0x5d]));
-    let rect = Rect::at(20, 20).of_size(560, 30 + (text_height as u32) + 30);
+    let rect = Rect::at(20, 20).of_size(image_width - 40, image_height - 80);
     draw_filled_rect_mut(&mut image, rect, Rgb([255, 255, 255]));
-    let x_offset = 50.;
-    let y_offset = 50.;
 
     for (v_index, line) in wrapped_text.into_iter().enumerate() {
         let mut h_index = 0u32;
         for c in line.chars() {
-            let x_position = (x_offset + (h_index as f32) * half_font_size) as u32;
-            let y_position = (y_offset + (v_index as f32) * full_font_size) as u32;
+            let x_position = (text_start_at_x + (h_index as f32) * half_font_size) as u32;
+            let y_position = (text_start_at_y + (v_index as f32) * full_font_size) as u32;
             draw_text_mut(
                 &mut image, Rgb([0, 0, 0]),
                 x_position, y_position,
