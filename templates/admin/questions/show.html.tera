@@ -8,6 +8,10 @@
         </div>
 
         <p>{{ body }}</p>
+
+        <form action='/admin/question/{{id}}/hide' method='POST' class='ignore-button'>
+            <button type='submit'>回答しない</button>
+        </form>
     </div>
 
 

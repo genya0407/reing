@@ -7,6 +7,7 @@ use std::ops::Deref;
 use std::collections::HashMap;
 use diesel::RunQueryDsl;
 use diesel::QueryDsl;
+use diesel::SaveChangesDsl;
 use diesel::ExpressionMethods;
 use db::schema::{questions, answers};
 
@@ -107,6 +108,18 @@ impl Repository {
                 .load::<(db::Question, Option<db::Answer>)>(self.conn())
                 .unwrap();
         self.qas2questions(qas).into_iter().next()
+    }
+
+    // this method doesn't update answers.
+    pub fn update_question(&self, question: Question) {
+        let q = db::QuestionForm {
+            id: question.id,
+            body: question.body,
+            ip_address: question.ip_address,
+            hidden: question.hidden,
+            created_at: question.created_at.with_timezone(&Utc)
+        };
+        q.save_changes::<db::Question>(self.conn()).unwrap();
     }
 
     fn qas2questions(&self, qas: Vec<(db::Question, Option<db::Answer>)>) -> Vec<Question> {

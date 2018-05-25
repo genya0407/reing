@@ -135,6 +135,10 @@ section.admin-question-show div.question {
   section.admin-question-show div.question p {
     white-space: pre-wrap;
     margin-bottom: 0px; }
+  section.admin-question-show div.question form.ignore-button {
+    padding: 0;
+    margin: 0;
+    text-align: right; }
 
 div.answer-form {
   max-width: 400px;

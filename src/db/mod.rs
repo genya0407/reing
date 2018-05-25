@@ -19,6 +19,16 @@ pub struct Question {
     pub created_at: DateTime<Utc>,
 }
 
+#[derive(AsChangeset, Identifiable)]
+#[table_name = "questions"]
+pub struct QuestionForm {
+    pub id: i32,
+    pub body: String,
+    pub ip_address: String,
+    pub hidden: bool,
+    pub created_at: DateTime<Utc>,
+}
+
 #[derive(Insertable)]
 #[table_name="answers"]
 pub struct NewAnswer {

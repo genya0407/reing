@@ -209,6 +209,7 @@ struct AdminIndexDTO {
 fn admin_index(repo: web::guard::Repository, _auth: web::guard::BasicAuth) -> Template {
     let question_dtos = repo.not_answered_questions()
                             .into_iter()
+                            .filter(|q| !q.hidden )
                             .map(|q| QuestionDTO::from(q))
                             .collect::<Vec<_>>();
     let context = AdminIndexDTO { questions: question_dtos };
@@ -246,6 +247,17 @@ fn admin_post_answer(
     response::Redirect::to("/admin")
 }
 
+/* POST /admin/question/<id>/hide */
+
+#[post("/admin/question/<id>/hide")]
+fn admin_hide_question(id: i32, repo: web::guard::Repository, _auth: web::guard::BasicAuth ) -> response::Redirect {
+    let mut question = repo.find_question(id).unwrap();
+    question.hidden = true;
+    repo.update_question(question);
+
+    response::Redirect::to("/admin")
+}
+
 /* Force login */
 
 struct RequireLogin();
@@ -278,7 +290,7 @@ fn main() {
         .manage(pool)
         .mount("/", routes![
             index, files, post_question, after_post_question, show_question,
-            admin_index, admin_post_answer, admin_show_question
+            admin_index, admin_post_answer, admin_show_question, admin_hide_question
         ])
         .catch(errors![unauthorized])
         .attach(Template::fairing())
