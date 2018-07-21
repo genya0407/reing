@@ -183,14 +183,22 @@ fn after_post_question(id: i32, repo: web::guard::Repository) -> Result<Template
 
 #[derive(Serialize, Debug)]
 struct ShowQuestionDTO {
-    pub question: QuestionDTO
+    pub question: QuestionDTO,
+    pub next_question: Option<QuestionDTO>,
+    pub prev_question: Option<QuestionDTO>,
 }
 
 #[get("/question/<id>")]
 fn show_question(id: i32, repo: web::guard::Repository) -> Result<Template, status::NotFound<&'static str>> {
     if let Some(question) = repo.find_question(id) {
         if question.answered() {
-            let context = ShowQuestionDTO { question: QuestionDTO::from(question) };
+            let next_question_opt = repo.find_next_question(question.id);
+            let prev_question_opt = repo.find_prev_question(question.id);
+            let context = ShowQuestionDTO {
+                question: QuestionDTO::from(question),
+                next_question: next_question_opt.map(|q| QuestionDTO::from(q)),
+                prev_question: prev_question_opt.map(|q| QuestionDTO::from(q))
+            };
             return Ok(Template::render("question/show", &context));
         }
     }

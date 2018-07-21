@@ -105,6 +105,31 @@ impl Repository {
         let qas = questions::table
                 .left_join(answers::table)
                 .filter(questions::id.eq(id))
+                .limit(1)
+                .load::<(db::Question, Option<db::Answer>)>(self.conn())
+                .unwrap();
+        self.qas2questions(qas).into_iter().next()
+    }
+
+    pub fn find_next_question(&self, id: i32) -> Option<Question> {
+        let qas = questions::table
+                .left_join(answers::table)
+                .filter(questions::id.gt(id))
+                .filter(answers::id.is_not_null())
+                .order(questions::id.asc())
+                .limit(1)
+                .load::<(db::Question, Option<db::Answer>)>(self.conn())
+                .unwrap();
+        self.qas2questions(qas).into_iter().next()
+    }
+
+    pub fn find_prev_question(&self, id: i32) -> Option<Question> {
+        let qas = questions::table
+                .left_join(answers::table)
+                .filter(questions::id.lt(id))
+                .filter(answers::id.is_not_null())
+                .order(questions::id.desc())
+                .limit(1)
                 .load::<(db::Question, Option<db::Answer>)>(self.conn())
                 .unwrap();
         self.qas2questions(qas).into_iter().next()

@@ -14,6 +14,20 @@
         </div>
     {% endfor %}
 
+    <div class='next-prev-question'>
+        <div>
+        {% if next_question %}
+            <a href='/question/{{ next_question.id }}'>Next</a>
+        {% endif %}
+        </div>
+
+        <div>
+        {% if prev_question %}
+            <a href='/question/{{ prev_question.id }}'>Prev</a>
+        {% endif %}
+        </div>
+    </div>
+
     <div class='one-more-question'>
         <p><small>他の質問を投稿する</small></p>
         {% include "widget/question_form" %}

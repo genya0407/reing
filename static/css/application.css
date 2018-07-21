@@ -126,6 +126,21 @@ section.question-show div.answer-card {
     border: 2px solid #2c365d;
     border-radius: 10px;
     padding: 20px; }
+section.question-show div.next-prev-question {
+  max-width: 300px;
+  margin: auto;
+  margin-bottom: 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; }
+  section.question-show div.next-prev-question div a {
+    text-decoration: none;
+    font-size: 15px;
+    color: #777;
+    border-radius: 10px;
+    border: 2px solid #2c365d;
+    background-color: white;
+    padding: 10px 20px 10px 20px; }
 
 section.admin-question-show div.question {
   background-color: white;
