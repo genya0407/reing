@@ -49,16 +49,10 @@ impl<'a, 'r> FromRequest<'a, 'r> for ClientIP {
     type Error = ();
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
-        let ip_address = if let Some(x_forwarded_for) = request.headers().get("x-forwarded-for").next() {
-            if let Some(ip_address) = x_forwarded_for.split(',').last() {
-                ip_address.to_string()
-            } else {
-                String::from("")
-            }
-        } else {
-            String::from("")
+        let ip_address = match request.remote() {
+            Some(ip_address) => format!("{}", ip_address),
+            None => String::from("")
         };
-
         Outcome::Success(ClientIP(ip_address))
     }
 }
