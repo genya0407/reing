@@ -279,7 +279,7 @@ impl<'r> response::Responder<'r> for RequireLogin {
     }
 }
 
-#[error(401)]
+#[catch(401)]
 fn unauthorized(_req: &Request) -> RequireLogin {
     RequireLogin()
 }
@@ -300,7 +300,7 @@ fn main() {
             index, files, post_question, after_post_question, show_question,
             admin_index, admin_post_answer, admin_show_question, admin_hide_question
         ])
-        .catch(errors![unauthorized])
+        .catch(catchers![unauthorized])
         .attach(Template::fairing())
         .launch();
 }
