@@ -91,10 +91,11 @@ fn redirect_ssl(path: PathBuf, _ssl: web::guard::ForceSSL) -> response::Redirect
 /* GET /static/ */
 
 #[get("/static/<file..>")]
-fn files(file: PathBuf) -> Result<response::NamedFile, status::NotFound<String>> {
+fn files(file: PathBuf) -> Result<web::CachedFile, status::NotFound<String>> {
     let path = Path::new("static/").join(file);
     response::NamedFile::open(&path)
         .map_err(|_| status::NotFound(format!("Bad path: {:?}", path)))
+        .map(|nf| web::CachedFile(nf))
 }
 
 /* GET / */
