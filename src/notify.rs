@@ -6,7 +6,8 @@ use std::thread;
 use std::env;
 
 pub fn send_email(question: model::Question) {
-    thread::spawn(move || {
+    let builder = thread::Builder::new().name("send-email-thread".into());
+    builder.spawn(move || {
         let question_url = format!(
             "https://{}/admin/question/{}",
             env::var("APPLICATION_DOMAIN").expect("APPLICATION_DOMAIN not specified"),
