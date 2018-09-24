@@ -15,7 +15,7 @@ base64 = "0.9.1"
 serde = "1.0.53"
 serde_derive = "1.0.53"
 
-egg-mode = "0.12.0"
+egg-mode = { git = 'https://github.com/QuietMisdreavus/twitter-rs', rev = '37e47c2214c2540a3a7b2b649da298572ad86fa0' }
 tokio-core = "0.1.17"
 
 diesel = { version = "1.0.0", features = ["postgres", "chrono"] }
