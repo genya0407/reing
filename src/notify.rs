@@ -1,4 +1,4 @@
-use lettre::{EmailTransport, SmtpTransport};
+use lettre::{SmtpTransport, SmtpClient, Transport};
 use lettre_email::EmailBuilder;
 use lettre::smtp::authentication::{Mechanism, Credentials};
 use model;
@@ -27,15 +27,15 @@ pub fn send_email(question: model::Question) {
             .expect("Failed to build email.");
 
         let domain = env::var("MAILER_DOMAIN").expect("MAILER_DOMAIN not specified");
-        let mut mailer = SmtpTransport::simple_builder(&domain).expect("Failed to initialize builder")
-                            .authentication_mechanism(Mechanism::Plain)
-                            .credentials(
-                                Credentials::new(
-                                    env::var("MAILER_USERNAME").expect("MAILER_USERNAME not specified"),
-                                    env::var("MAILER_PASSWORD").expect("MAILER_PASSWORD not specified")
-                                )
+        let builder = SmtpClient::new_simple(&domain).expect("Failed to initialize builder")
+                        .authentication_mechanism(Mechanism::Plain)
+                        .credentials(
+                            Credentials::new(
+                                env::var("MAILER_USERNAME").expect("MAILER_USERNAME not specified"),
+                                env::var("MAILER_PASSWORD").expect("MAILER_PASSWORD not specified")
                             )
-                            .build();
-        mailer.send(&email).expect("Failed to send email.");
-    });
+                        );
+        let mut mailer = SmtpTransport::new(builder);
+        mailer.send(email.into()).expect("Failed to send email.");
+    }).unwrap();
 }
