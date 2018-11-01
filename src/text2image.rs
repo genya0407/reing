@@ -4,31 +4,6 @@ use imageproc::drawing::{draw_text_mut, draw_filled_rect_mut};
 use image::{Rgb, RgbImage};
 use rusttype::{Font, FontCollection, Scale};
 
-#[test]
-fn text2image_test() {
-    use std::path::Path;
-    let original_text = vec![
-        "私はその人を常に先生と呼んでいた。",
-        "だからここでもただ先生と書くだけで本名は打ち明けない。",
-        "これは世間を憚かる遠慮というよりも、その方が私にとって自然だからである。",
-        "私はその人の記憶を呼び起すごとに、すぐ「先生」といいたくなる。",
-        "筆を執っても心持は同じ事である。",
-        "よそよそしい頭文字などは",
-        "とても使う気にならない。",
-        "私が先生と知り合いになったのは鎌倉である。",
-        "その時私はまだ若々しい書生であった。",
-        "暑中休暇を利用して海水浴に行った友達からぜひ来いという端書を受け取ったので、私は多少の金を工面して、出掛ける事にした。",
-        "私は金の工面に二、三日を費やした。",
-        "ところが私が鎌倉に着いて三日と経たないうちに、私を呼び寄せた友達は、急に国元から帰れという電報を受け取った。",
-        "電報には母が病気だからと断ってあったけれども友達はそれを信じなかった。",
-        "友達はかねてから国元にいる親たちに勧まない結婚を強いられていた。"
-    ];
-    for i in 0..original_text.len() {
-        let img = text2image(original_text[0..i].join("\n"));
-        img.save(Path::new(&format!("test_images/test{}.png", i))).unwrap();
-    }
-}
-
 pub fn text2image(text: String) -> image::RgbImage {
     let font = get_vl_gothic();
 
@@ -80,6 +55,30 @@ pub fn text2image(text: String) -> image::RgbImage {
     return image;
 }
 
+#[test]
+fn text2image_test() {
+    use std::path::Path;
+    let original_text = vec![
+        "私はその人を常に先生と呼んでいた。",
+        "だからここでもただ先生と書くだけで本名は打ち明けない。",
+        "これは世間を憚かる遠慮というよりも、その方が私にとって自然だからである。",
+        "私はその人の記憶を呼び起すごとに、すぐ「先生」といいたくなる。",
+        "筆を執っても心持は同じ事である。",
+        "よそよそしい頭文字などは",
+        "とても使う気にならない。",
+        "私が先生と知り合いになったのは鎌倉である。",
+        "その時私はまだ若々しい書生であった。",
+        "暑中休暇を利用して海水浴に行った友達からぜひ来いという端書を受け取ったので、私は多少の金を工面して、出掛ける事にした。",
+        "私は金の工面に二、三日を費やした。",
+        "ところが私が鎌倉に着いて三日と経たないうちに、私を呼び寄せた友達は、急に国元から帰れという電報を受け取った。",
+        "電報には母が病気だからと断ってあったけれども友達はそれを信じなかった。",
+        "友達はかねてから国元にいる親たちに勧まない結婚を強いられていた。"
+    ];
+    for i in 0..original_text.len() {
+        let img = text2image(original_text[0..i].join("\n"));
+        img.save(Path::new(&format!("test_images/test{}.png", i))).unwrap();
+    }
+}
 #[test]
 fn test_wrap_text() {
     assert_eq!(

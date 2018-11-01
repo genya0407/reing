@@ -3,6 +3,10 @@ name = "reing"
 version = "0.1.0"
 authors = ["Yusuke Sangenya <longinus.eva@gmail.com>"]
 
+[[bin]]
+name = "reing"
+path = "src/main.rs"
+
 [dependencies]
 dotenv = "0.11.0"
 chrono = { version = "0.4.2", features = ["serde"] }
