@@ -17,11 +17,9 @@ extern crate r2d2_diesel;
 extern crate diesel;
 extern crate egg_mode;
 extern crate tokio_core;
-extern crate image;
-extern crate imageproc;
-extern crate rusttype;
 extern crate lettre;
 extern crate lettre_email;
+extern crate reing_text2image;
 
 use std::env;
 use std::path::{Path, PathBuf};
@@ -36,7 +34,6 @@ use chrono::prelude::*;
 mod web;
 mod model;
 mod db;
-mod text2image;
 mod tweet;
 mod utils;
 mod notify;
@@ -250,8 +247,8 @@ fn admin_post_answer(
 
     let answer_body = params.get().body.clone();
     if let Some(question) = repo.store_answer(id, answer_body.clone()) {
-        let img = text2image::text2image(question.body);
-        tweet::tweet_answer(id, answer_body, img);
+        let text_image = reing_text2image::TextImage::new(question.body, String::from("Reing"), (0x2c, 0x36, 0x5d));
+        tweet::tweet_answer(id, answer_body, text_image);
     }
     response::Redirect::to("/admin")
 }
