@@ -32,7 +32,7 @@ use rocket::Request;
 use rocket_contrib::Template;
 use chrono::prelude::*;
 use reing_text2image::TextImage;
-use std::thread;
+use std::{thread, time};
 use rocket::State;
 
 mod web;
@@ -303,6 +303,7 @@ fn main() {
         loop {
             let (question_id, answer, question_image) = tweet_receiver.recv().unwrap();
             tweet::tweet_answer(question_id, answer, question_image);
+            thread::sleep(time::Duration::from_secs(5 * 60));
         }
     });
 
