@@ -21,6 +21,7 @@ extern crate lettre;
 extern crate lettre_email;
 extern crate reing_text2image;
 
+use std::sync::mpsc::{SyncSender, sync_channel};
 use std::env;
 use std::path::{Path, PathBuf};
 use rocket::http::{Header, Status};
@@ -30,6 +31,9 @@ use rocket::response::status;
 use rocket::Request;
 use rocket_contrib::Template;
 use chrono::prelude::*;
+use reing_text2image::TextImage;
+use std::thread;
+use rocket::State;
 
 mod web;
 mod model;
@@ -242,13 +246,14 @@ struct PostAnswerForm {
 fn admin_post_answer(
     id: i32, repo: web::guard::Repository, 
     params: request::Form<PostAnswerForm>,
+    tweet_sender: State<SyncSender<(i32, String, TextImage)>>,
     _auth: web::guard::BasicAuth
     ) -> response::Redirect {
 
     let answer_body = params.get().body.clone();
     if let Some(question) = repo.store_answer(id, answer_body.clone()) {
         let text_image = reing_text2image::TextImage::new(question.body, String::from("Reing"), (0x2c, 0x36, 0x5d));
-        tweet::tweet_answer(id, answer_body, text_image);
+        tweet_sender.send((id, answer_body, text_image)).unwrap();
     }
     response::Redirect::to("/admin")
 }
@@ -292,8 +297,18 @@ fn main() {
         .build(manager)
         .unwrap();
 
+    let (tweet_sender, tweet_receiver) = sync_channel(1000);
+
+    thread::spawn(move || {
+        loop {
+            let (question_id, answer, question_image) = tweet_receiver.recv().unwrap();
+            tweet::tweet_answer(question_id, answer, question_image);
+        }
+    });
+
     rocket::ignite()
         .manage(pool)
+        .manage(tweet_sender)
         .mount("/", routes![
             index, files, post_question, after_post_question, show_question,
             admin_index, admin_post_answer, admin_show_question, admin_hide_question
