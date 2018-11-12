@@ -4,88 +4,6 @@ Reingは [Peing - 質問箱 -](https://peing.net) のクローンアプリケー
 
 匿名で質問を受け付けることができ、回答をTwitterに流すことができます。
 
-## How to setup
-
-Reingのサーバーの建て方を説明します。
-
-以下ではインフラとして[Heroku](https://jp.heroku.com/)を使う前提で話を進めますが、Herokuに依存しているわけではありません。お好きな環境にデプロイすることができます。
-
-### Clone repository
-
-このレポジトリを手元にcloneします。
-
-```
-$ git clone git@github.com:genya0407/reing.git
-```
-
-### Herokuのapplicationを作成する
-
-cloneしたディレクトリに移動します。
-そして、Herokuのアプリケーションを作成し、buildpackとデータベースを設定し、デプロイします。
-
-そこそこ時間がかかります。
-
-```
-$ cd reing
-$ heroku create
-$ heroku buildpacks:add https://github.com/emk/heroku-buildpack-rust.git
-$ heroku buildpacks:add https://github.com/sgrif/heroku-buildpack-diesel.git
-$ heroku addons:create heroku-postgresql
-$ git push heroku master
-$ heroku run ./bin/diesel migration run
-```
-
-### 環境変数を設定する
-
-以下の環境変数を設定します。設定例が[./.env.sample](./.env.sample)にあります。
-
-※herokuでは `heroku config:set KEY=VALUE` で環境変数を設定することができます。
-
-#### 必須
-
-- `ADMIN_USERNAME`
-  - ログインする際のIDを指定します
-- `ADMIN_PASSWORD`
-  - ログインする際のパスワードを指定します
-- `PROFILE_USERNAME`
-  - トップページに表示される回答者の名前を指定します
-- `PROFILE_IMAGE_URL`
-  - 例: `https://pbs.twimg.com/profile_images/932824218454016000/lvpcqMk4_400x400.jpg`
-  - トップページに表示される回答者のアイコン画像のURLを指定します
-- `DATABASE_URL`
-  - 例: `postgresql://username:password@127.0.0.1:5432/database-name`
-  - **Herokuを使う場合は設定する必要はありません**
-
-#### 任意
-
-- 共通
-  - `APPLICATION_DOMAIN`
-    - 例: `hidden-brook-48005.herokuapp.com`
-    - サーバーのドメイン名を指定します
-    - 質問投稿通知メールやTwitterに貼るリンクなどを生成するのに使われます
-- Twitter関連
-  - `TWITTER_CONSUMER_KEY`
-    - TwitterアプリケーションのConsumer keyを指定します
-    - Twitterアプリケーションを作成するには、[Twitter Application Management](https://apps.twitter.com/)にログインして、Create New Appをします
-  - `TWITTER_CONSUMER_SECRET`
-    - 同上
-  - `TWITTER_ACCESS_TOKEN`
-    - 同上
-  - `TWITTER_ACCESS_SECRET`
-    - 同上
-- 通知メール関連
-  - `ADMIN_EMAIL`
-    - 通知メールを送る先のメールアドレスを指定します
-  - `MAILER_FROM`
-    - 通知メールの `FROM` 欄として使われるメールアドレスを指定します
-  - `MAILER_DOMAIN`
-    - 例: `smtp.gmail.com`
-    - メールサーバーのドメインを指定します
-  - `MAILER_USERNAME`
-    - メールサーバーのアカウントのusernameを指定します
-  - `MAILER_PASSWORD`
-    - メールサーバーのアカウントのpasswordを指定します
-
 ## How to develop
 
 ローカル環境での動かし方について述べます。
@@ -94,29 +12,45 @@ $ heroku run ./bin/diesel migration run
 
 [rustup](https://rustup.rs/) などを使ってRustの環境を作ります。
 
-開発に使われているコンパイラのバージョンは[RustConfig](./RustConfig)に書いてあります。
+開発に使われているコンパイラのバージョンは `rustc 1.30.0-nightly (f49f6e73a 2018-09-23)` です。
 
 ### PostgreSQLサーバーを立てる
 
 何らかの手段でPostgreSQLサーバーを立てます。
 
-オススメは[./scripts/launch_db.sh](./scripts/launch_db.sh) を使ってDockerでサーバーを立てることです。
+オススメは[scripts/launch_db.sh](/scripts/launch_db.sh) を使ってDockerでサーバーを立てることです。
 
 ### 環境変数を設定する
 
 前節で説明した環境変数を設定します。
 
 実行時にターミナルから与えても良いですが、 `.env` で環境変数を設定することができます。
+`.env.sample`に環境変数の設定の例があるので、これを用いるのが簡単だと思います。
 
 ```
 $ cp .env.sample .env
 $ vim .env
 ```
 
-環境変数の内容自体は、前節のものと同じです。
+環境変数の意味は[docs/env.md](/docs/env.md)で解説されています。
+
+### マイグレーション
+
+マイグレーションを行うためには [Diesel CLI](https://github.com/diesel-rs/diesel/tree/master/diesel_cli) がインストールされている必要があります。
+
+```
+$ cd reing
+$ DATABASE_URL='postgresql://username:password@127.0.0.1:5432/database-name' diesel migration run
+```
+
+### ビルド&起動
+
+```
+$ cargo run
+```
 
 ## How to contribute
 
 もし機能追加などをしてくださる奇特な方がいらっしゃれば大歓迎です。
 
-適当にForkしてPull Requestを投げつけてください。
+まずissueを立てて機能の要求などを相談してくれるとありがたいです。
