@@ -18,7 +18,7 @@ Reingは [Peing - 質問箱 -](https://peing.net) のクローンアプリケー
 
 何らかの手段でPostgreSQLサーバーを立てます。
 
-オススメは[scripts/launch_db.sh](/scripts/launch_db.sh) を使ってDockerでサーバーを立てることです。
+オススメは [scripts/launch_db.sh](/scripts/launch_db.sh) を使ってDockerでサーバーを立てることです。
 
 ### 環境変数を設定する
 
@@ -32,7 +32,7 @@ $ cp .env.sample .env
 $ vim .env
 ```
 
-環境変数の意味は[docs/env.md](/docs/env.md)で解説されています。
+環境変数の意味は [docs/env.md](/docs/env.md)で解説されています。
 
 ### マイグレーション
 
