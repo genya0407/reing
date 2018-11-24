@@ -1,7 +1,7 @@
-use tokio_core::reactor::Core;
 use egg_mode;
 use egg_mode::media::{UploadBuilder, media_types};
 use egg_mode::tweet::DraftTweet;
+use tokio::runtime::current_thread::block_on_all;
 use std::path::Path;
 use uuid::Uuid;
 use std::fs::File;
@@ -20,17 +20,11 @@ fn get_twitter_access_token() -> egg_mode::Token {
 }
 
 pub fn tweet_answer(question_id: i32, answer: String, question_image: TextImage) {
-    let mut core = Core::new().unwrap();
-    let handle = core.handle();
-    let token = get_twitter_access_token();
-
     let tmp_filepath = format!("/tmp/{}.jpg", Uuid::new_v4());
     let tmp_filepath = Path::new(&tmp_filepath);
     question_image.save_image(&tmp_filepath).unwrap();
     let mut image_buf = vec![];
     File::open(&tmp_filepath).unwrap().read_to_end(&mut image_buf).unwrap();
-    let builder = UploadBuilder::new(image_buf, media_types::image_jpg());
-    let media_handle = core.run(builder.call(&token, &handle)).unwrap();
 
     let question_url = format!(
         "https://{}/question/{}",
@@ -38,7 +32,11 @@ pub fn tweet_answer(question_id: i32, answer: String, question_image: TextImage)
         question_id
     );
     let tweet_text = format!("{} #reing {}", answer, question_url);
+
+    let token = get_twitter_access_token();
+    let builder = UploadBuilder::new(image_buf, media_types::image_jpg());
+    let media_handle = block_on_all(builder.call(&token)).unwrap();
     let draft = DraftTweet::new(tweet_text)
                     .media_ids(&[media_handle.id]);
-    core.run(draft.send(&token, &handle)).unwrap();
+    block_on_all(draft.send(&token)).unwrap();
 }

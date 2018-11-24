@@ -16,7 +16,7 @@ extern crate r2d2_diesel;
 #[macro_use]
 extern crate diesel;
 extern crate egg_mode;
-extern crate tokio_core;
+extern crate tokio;
 extern crate lettre;
 extern crate lettre_email;
 extern crate reing_text2image;
@@ -244,7 +244,7 @@ struct PostAnswerForm {
 
 #[post("/admin/question/<id>/answer", data = "<params>")]
 fn admin_post_answer(
-    id: i32, repo: web::guard::Repository, 
+    id: i32, repo: web::guard::Repository,
     params: request::Form<PostAnswerForm>,
     tweet_sender: State<SyncSender<(i32, String, TextImage)>>,
     _auth: web::guard::BasicAuth
