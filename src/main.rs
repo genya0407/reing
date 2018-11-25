@@ -105,6 +105,7 @@ fn files(file: PathBuf) -> Result<web::CachedFile, status::NotFound<String>> {
 struct IndexDTO {
     pub profile: ProfileDTO,
     pub answered_questions: Vec<QuestionDTO>,
+    pub site_url: String,
 }
 
 #[derive(Serialize, Debug)]
@@ -126,6 +127,7 @@ fn index(repo: web::guard::Repository) -> Template {
             image_url: env::var("PROFILE_IMAGE_URL").unwrap()
         },
         answered_questions: question_dtos,
+        site_url: format!("https://{}/", env::var("APPLICATION_DOMAIN").unwrap())
     };
     Template::render("index", &context)
 }
