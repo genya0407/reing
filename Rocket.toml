@@ -1,0 +1,7 @@
+[production]
+address = "localhost"
+port = 8000
+workers = 1
+keep_alive = 5
+log = "critical"
+secret_key = "hPRYyVRiMyxpw5sBB1XeCMN1kFsDCqKvBi2QJxBVHQk="
