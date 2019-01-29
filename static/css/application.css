@@ -108,6 +108,20 @@ section.index .profile {
     padding: 10px; }
     section.index .profile .content p {
       margin: auto; }
+section.index div.next-prev-page {
+  margin: auto 30px auto 30px;
+  margin-bottom: 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; }
+  section.index div.next-prev-page div a {
+    text-decoration: none;
+    font-size: 15px;
+    color: #777;
+    border-radius: 10px;
+    border: 2px solid #2c365d;
+    background-color: white;
+    padding: 10px 20px 10px 20px; }
 
 section.question-show div.answer-card {
   background-color: white;

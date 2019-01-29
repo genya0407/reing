@@ -41,5 +41,19 @@
         </a>
     </div>
     {% endfor %}
+
+    <div class='next-prev-page'>
+        <div>
+        {% if next_page is number %}
+            <a href='/page/{{ next_page }}'>Next</a>
+        {% endif %}
+        </div>
+
+        <div>
+        {% if prev_page %}
+            <a href='/page/{{ prev_page }}'>Prev</a>
+        {% endif %}
+        </div>
+    </div>
 </section>
 {% endblock main %}

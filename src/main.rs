@@ -106,6 +106,8 @@ struct IndexDTO {
     pub profile: ProfileDTO,
     pub answered_questions: Vec<QuestionDTO>,
     pub site_url: String,
+    pub next_page: Option<i64>,
+    pub prev_page: Option<i64>,
 }
 
 #[derive(Serialize, Debug)]
@@ -114,23 +116,30 @@ struct ProfileDTO {
     pub image_url: String,
 }
 
+#[test]
+fn next_prev_page_test() {
+    assert!((None, Some(1)) == next_prev_page(0));
+    assert!((Some(0), Some(2)) == next_prev_page(1));
+    assert!((Some(1), Some(3)) == next_prev_page(2));
+}
+
+// next: newer, prev: older
+// older -> page number increases
+fn next_prev_page(current_page: i64) -> (Option<i64>, Option<i64>) {
+    let prev_page = Some(current_page + 1);
+    let next_page = if current_page <= 0 {
+        None
+    } else {
+        Some(current_page - 1)
+    };
+    return (next_page, prev_page);
+}
+
 const QUESTION_COUNT_PER_PAGE : i64 = 30;
 #[get("/")]
 fn index(repo: web::guard::Repository) -> Template {
-    let mut question_dtos = repo.answered_questions(0, QUESTION_COUNT_PER_PAGE)
-                                .into_iter()
-                                .map(|q| QuestionDTO::from(q))
-                                .collect::<Vec<_>>();
-    question_dtos.reverse();
-    let context = IndexDTO {
-        profile: ProfileDTO {
-            username: env::var("PROFILE_USERNAME").unwrap(),
-            image_url: env::var("PROFILE_IMAGE_URL").unwrap()
-        },
-        answered_questions: question_dtos,
-        site_url: format!("https://{}/", env::var("APPLICATION_DOMAIN").unwrap())
-    };
-    Template::render("index", &context)
+    let page = 0;
+    index_with_page(repo, page)
 }
 
 #[get("/page/<page>")]
@@ -141,13 +150,16 @@ fn index_with_page(repo: web::guard::Repository, page: i64) -> Template {
                                 .map(|q| QuestionDTO::from(q))
                                 .collect::<Vec<_>>();
     question_dtos.reverse();
+    let (next_page, prev_page) = next_prev_page(page);
     let context = IndexDTO {
         profile: ProfileDTO {
             username: env::var("PROFILE_USERNAME").unwrap(),
             image_url: env::var("PROFILE_IMAGE_URL").unwrap()
         },
         answered_questions: question_dtos,
-        site_url: format!("https://{}/", env::var("APPLICATION_DOMAIN").unwrap())
+        site_url: format!("https://{}/", env::var("APPLICATION_DOMAIN").unwrap()),
+        prev_page: prev_page,
+        next_page: next_page,
     };
     Template::render("index", &context)
 }
