@@ -1,1 +1,1 @@
-sass --watch assets/stylesheets:static/css
+sass --watch assets/stylesheets/application.sass:templates/css/application.css.tera

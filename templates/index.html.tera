@@ -11,6 +11,7 @@
 {% endblock head %}
 
 {% block main %}
+
 <section class='index'>
     <div class='profile'>
         <div class='header'>

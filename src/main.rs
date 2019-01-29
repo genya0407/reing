@@ -154,7 +154,7 @@ fn index_with_page(repo: web::guard::Repository, page: i64) -> Template {
     let context = IndexDTO {
         profile: ProfileDTO {
             username: env::var("PROFILE_USERNAME").unwrap(),
-            image_url: env::var("PROFILE_IMAGE_URL").unwrap()
+            image_url: String::from("/static/image/profile.jpg")
         },
         answered_questions: question_dtos,
         site_url: format!("https://{}/", env::var("APPLICATION_DOMAIN").unwrap()),
