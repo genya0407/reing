@@ -83,10 +83,13 @@ impl Repository {
         })
     }
 
-    pub fn answered_questions(&self) -> Vec<Question> {
+    pub fn answered_questions(&self, offset: i64, count: i64) -> Vec<Question> {
         let qas = questions::table
                 .left_join(answers::table)
                 .filter(answers::id.is_not_null())
+                .offset(offset)
+                .limit(count)
+                .order(answers::created_at.desc())
                 .load::<(db::Question, Option<db::Answer>)>(self.conn())
                 .unwrap();
         self.qas2questions(qas)
@@ -96,6 +99,7 @@ impl Repository {
         let qas = questions::table
                 .left_join(answers::table)
                 .filter(answers::id.is_null())
+                .order(answers::created_at.desc())
                 .load::<(db::Question, Option<db::Answer>)>(self.conn())
                 .unwrap();
         self.qas2questions(qas)                

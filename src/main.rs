@@ -114,9 +114,29 @@ struct ProfileDTO {
     pub image_url: String,
 }
 
+const QUESTION_COUNT_PER_PAGE : i64 = 30;
 #[get("/")]
 fn index(repo: web::guard::Repository) -> Template {
-    let mut question_dtos = repo.answered_questions()
+    let mut question_dtos = repo.answered_questions(0, QUESTION_COUNT_PER_PAGE)
+                                .into_iter()
+                                .map(|q| QuestionDTO::from(q))
+                                .collect::<Vec<_>>();
+    question_dtos.reverse();
+    let context = IndexDTO {
+        profile: ProfileDTO {
+            username: env::var("PROFILE_USERNAME").unwrap(),
+            image_url: env::var("PROFILE_IMAGE_URL").unwrap()
+        },
+        answered_questions: question_dtos,
+        site_url: format!("https://{}/", env::var("APPLICATION_DOMAIN").unwrap())
+    };
+    Template::render("index", &context)
+}
+
+#[get("/page/<page>")]
+fn index_with_page(repo: web::guard::Repository, page: i64) -> Template {
+    let offset = page * QUESTION_COUNT_PER_PAGE;
+    let mut question_dtos = repo.answered_questions(offset, QUESTION_COUNT_PER_PAGE)
                                 .into_iter()
                                 .map(|q| QuestionDTO::from(q))
                                 .collect::<Vec<_>>();
@@ -313,7 +333,7 @@ fn main() {
         .manage(pool)
         .manage(tweet_sender)
         .mount("/", routes![
-            index, files, post_question, after_post_question, show_question,
+            index, index_with_page, files, post_question, after_post_question, show_question,
             admin_index, admin_post_answer, admin_show_question, admin_hide_question
         ])
         .catch(catchers![unauthorized])
