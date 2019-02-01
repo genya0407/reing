@@ -5,3 +5,4 @@
 test_images/*
 !test_images/.keep
 bench.csv
+analyze/
