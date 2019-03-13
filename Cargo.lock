@@ -1533,7 +1533,7 @@ dependencies = [
  "lettre_email 0.9.0 (git+https://github.com/lettre/lettre?rev=fc91bb6ee8f9a28b818e98598af0a83a0dbb41d3)",
  "r2d2 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2-diesel 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "reing_text2image 0.1.0 (git+https://github.com/genya0407/reing_text2image.git)",
+ "reing_text2image 0.1.0 (git+https://github.com/genya0407/reing_text2image.git?rev=11631a56207ec47d346d5f97c1dd631855b2e7f6)",
  "rocket 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_codegen 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_contrib 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1546,7 +1546,7 @@ dependencies = [
 [[package]]
 name = "reing_text2image"
 version = "0.1.0"
-source = "git+https://github.com/genya0407/reing_text2image.git#75cd9ebb7229be950cb3a3ecffa83b290e4a555b"
+source = "git+https://github.com/genya0407/reing_text2image.git?rev=11631a56207ec47d346d5f97c1dd631855b2e7f6#11631a56207ec47d346d5f97c1dd631855b2e7f6"
 dependencies = [
  "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2502,7 +2502,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum regex-syntax 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)" = "f9ec002c35e86791825ed294b50008eea9ddfc8def4420124fbc6b08db834957"
 "checksum regex-syntax 0.5.6 (registry+https://github.com/rust-lang/crates.io-index)" = "7d707a4fa2637f2dca2ef9fd02225ec7661fe01a53623c1e6515b6916511f7a7"
 "checksum regex-syntax 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)" = "747ba3b235651f6e2f67dfa8bcdcd073ddb7c243cb21c442fc12395dfcac212d"
-"checksum reing_text2image 0.1.0 (git+https://github.com/genya0407/reing_text2image.git)" = "<none>"
+"checksum reing_text2image 0.1.0 (git+https://github.com/genya0407/reing_text2image.git?rev=11631a56207ec47d346d5f97c1dd631855b2e7f6)" = "<none>"
 "checksum remove_dir_all 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3488ba1b9a2084d38645c4c08276a1752dcbf2c7130d74f1569681ad5d2799c5"
 "checksum ring 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "1f2a6dc7fc06a05e6de183c5b97058582e9da2de0c136eafe49609769c507724"
 "checksum rocket 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)" = "a61d746c68f1d357f6e011985570474c4af368aa81900320074098d34ed0c64e"

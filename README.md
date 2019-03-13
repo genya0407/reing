@@ -11,8 +11,7 @@ Reingは [Peing - 質問箱 -](https://peing.net) のクローンアプリケー
 ### Rustの環境を作る
 
 [rustup](https://rustup.rs/) などを使ってRustの環境を作ります。
-
-開発に使われているコンパイラのバージョンは `rustc 1.30.0-nightly (f49f6e73a 2018-09-23)` です。
+**nightlyビルドのrustcでしかコンパイルできないので注意してください。**
 
 ### PostgreSQLサーバーを立てる
 
