@@ -2,7 +2,7 @@
 
 {% block head %}
 <meta property="og:type"         content="website" />
-<meta property="og:title"        content="Reing" />
+<meta property="og:title"        content="Search・{{ query }} - Reing" />
 <meta property="og:image"        content="{{ profile.image_url | safe }}" />
 <meta property="og:image:width"  content="256" />
 <meta property="og:image:height" content="256" />
@@ -29,10 +29,9 @@
 
     {% include "widget/question_form" %}
 
-    {% set query = "" %}
     {% include "widget/search_form" %}
 
-    {% for q in answered_questions %}
+    {% for q in search_results %}
     <div class='question-wrapper'>
         <a href='/question/{{q.id}}'>
             <div class='question'>
@@ -45,19 +44,5 @@
         </a>
     </div>
     {% endfor %}
-
-    <div class='next-prev-page'>
-        <div>
-        {% if next_page is number %}
-            <a href='/page/{{ next_page }}'>Next</a>
-        {% endif %}
-        </div>
-
-        <div>
-        {% if prev_page %}
-            <a href='/page/{{ prev_page }}'>Prev</a>
-        {% endif %}
-        </div>
-    </div>
 </section>
 {% endblock main %}

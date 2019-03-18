@@ -164,6 +164,39 @@ fn index_with_page(repo: web::guard::Repository, page: i64) -> Template {
     Template::render("index", &context)
 }
 
+#[derive(Serialize, Debug)]
+struct SearchDTO {
+    pub profile: ProfileDTO,
+    pub search_results: Vec<QuestionDTO>,
+    pub site_url: String,
+    pub query: String,
+}
+
+#[derive(FromForm)]
+struct SearchQuery {
+    pub query: String
+}
+
+#[get("/search?<query>")]
+fn search(repo: web::guard::Repository, query: SearchQuery) -> Template {
+    let query = query.query;
+    let mut question_dtos = repo.search_questions(query.clone())
+                                .into_iter()
+                                .map(|q| QuestionDTO::from(q))
+                                .collect::<Vec<_>>();
+    question_dtos.reverse();
+    let context = SearchDTO {
+        profile: ProfileDTO {
+            username: env::var("PROFILE_USERNAME").unwrap(),
+            image_url: String::from("/static/image/profile.jpg")
+        },
+        search_results: question_dtos,
+        site_url: format!("https://{}/", env::var("APPLICATION_DOMAIN").unwrap()),
+        query: query,
+    };
+    Template::render("search", &context)
+}
+
 /* POST /questions */
 
 #[derive(FromForm)]
@@ -346,7 +379,7 @@ fn main() {
         .manage(tweet_sender)
         .mount("/", routes![
             index, index_with_page, files, post_question, after_post_question, show_question,
-            admin_index, admin_post_answer, admin_show_question, admin_hide_question
+            admin_index, admin_post_answer, admin_show_question, admin_hide_question, search
         ])
         .catch(catchers![unauthorized])
         .attach(Template::fairing())

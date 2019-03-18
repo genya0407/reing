@@ -52,6 +52,28 @@ div.question-form {
       border: 2px solid #2c365d;
       color: #777; }
 
+div.search-form {
+  max-width: 400px;
+  width: 90%;
+  margin: auto;
+  margin-bottom: 30px; }
+  div.search-form input[type='text'] {
+    width: 70%;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: 2px solid #2c365d;
+    padding: 10px 20px 10px 20px;
+    font-size: 16px;
+    color: #777; }
+  div.search-form button {
+    width: 25%;
+    font-size: 20px;
+    padding: 10px 20px 10px 20px;
+    border-radius: 10px;
+    background-color: white;
+    border: 2px solid #2c365d;
+    color: #777; }
+
 div.question-wrapper {
   margin-bottom: 20px; }
   div.question-wrapper a {

@@ -1,0 +1,13 @@
+<div class='search-form'>
+    <form action='/search' method='GET' onsubmit='disableForm(this)'>
+        <input type='text' name='query' value='{{ query }}'></input>
+        <button type='submit'>検索</button>
+    </form>
+</div>
+
+<script type='text/javascript'>
+    function disableForm(form) {
+        Array.prototype.filter.call(form.elements, (elem) => { return elem.type === 'submit' })
+            .forEach((button) => { button.disabled = true; });
+    }
+</script>

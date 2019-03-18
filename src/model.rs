@@ -105,6 +105,20 @@ impl Repository {
         self.qas2questions(qas)                
     }
 
+    pub fn search_questions(&self, query: String) -> Vec<Question> {
+        use diesel::TextExpressionMethods;
+        use diesel::BoolExpressionMethods;
+
+        let qas = questions::table
+                .left_join(answers::table)
+                .filter(answers::id.is_not_null())
+                .filter(questions::body.like(&format!("%{}%", query)).or(answers::body.like(&format!("%{}%", query))))
+                .order(answers::created_at.desc())
+                .load::<(db::Question, Option<db::Answer>)>(self.conn())
+                .unwrap();
+        self.qas2questions(qas)
+    }
+
     pub fn find_question(&self, id: i32) -> Option<Question> {
         let qas = questions::table
                 .left_join(answers::table)
