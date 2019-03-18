@@ -58,17 +58,17 @@ div.search-form {
   margin: auto;
   margin-bottom: 30px; }
   div.search-form input[type='text'] {
-    width: 70%;
+    width: calc(100% - 100px);
     box-sizing: border-box;
-    border-radius: 5px;
+    border-radius: 10px;
     border: 2px solid #2c365d;
     padding: 10px 20px 10px 20px;
     font-size: 16px;
     color: #777; }
   div.search-form button {
-    width: 25%;
-    font-size: 20px;
-    padding: 10px 20px 10px 20px;
+    width: 80px;
+    font-size: 16px;
+    padding: 10px 10px 10px 10px;
     border-radius: 10px;
     background-color: white;
     border: 2px solid #2c365d;
