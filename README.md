@@ -1,8 +1,10 @@
 # Reing
 
 Reingは [Peing - 質問箱 -](https://peing.net) のクローンアプリケーションです。
-
 匿名で質問を受け付けることができ、回答をTwitterに流すことができます。
+
+このアプリケーションを起動すると次のリンクのようになります。
+https://reing.kuminecraft.xyz/
 
 ## How to develop
 
