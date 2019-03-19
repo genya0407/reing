@@ -2,9 +2,7 @@
 <html lang='ja'>
     <head>
         <title>Reing</title>
-        <style type='text/css'>
-            {% include "css/application" %}
-        </style>
+        <link rel="stylesheet" href="/static/css/application.css">
         <link rel="icon" href="/static/favicon.ico">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         {% block head %}{% endblock head %}
