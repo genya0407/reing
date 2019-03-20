@@ -8,6 +8,7 @@ use std::fs::File;
 use std::env;
 use std::io::Read;
 use reing_text2image::TextImage;
+use tokio::prelude::Future;
 
 fn get_twitter_access_token() -> egg_mode::Token {
     let con_token = egg_mode::KeyPair::new(env::var("TWITTER_CONSUMER_KEY").unwrap(), env::var("TWITTER_CONSUMER_SECRET").unwrap());
@@ -17,6 +18,11 @@ fn get_twitter_access_token() -> egg_mode::Token {
         consumer: con_token,
         access: access_token,
     }
+}
+
+pub fn get_twitter_username(screen_name: String) -> String {
+    let token = get_twitter_access_token();
+    block_on_all(egg_mode::user::show(&screen_name, &token).map(|u| u.clone().name)).unwrap()
 }
 
 pub fn tweet_answer(question_id: i32, answer: String, question_image: TextImage) {

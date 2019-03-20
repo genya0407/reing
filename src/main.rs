@@ -137,13 +137,13 @@ fn next_prev_page(current_page: i64) -> (Option<i64>, Option<i64>) {
 
 const QUESTION_COUNT_PER_PAGE : i64 = 30;
 #[get("/")]
-fn index(repo: web::guard::Repository) -> Template {
+fn index(repo: web::guard::Repository, profile: State<UserProfile>) -> Template {
     let page = 0;
-    index_with_page(repo, page)
+    index_with_page(repo, profile, page)
 }
 
 #[get("/page/<page>")]
-fn index_with_page(repo: web::guard::Repository, page: i64) -> Template {
+fn index_with_page(repo: web::guard::Repository, profile: State<UserProfile>, page: i64) -> Template {
     let offset = page * QUESTION_COUNT_PER_PAGE;
     let mut question_dtos = repo.answered_questions(offset, QUESTION_COUNT_PER_PAGE)
                                 .into_iter()
@@ -153,7 +153,7 @@ fn index_with_page(repo: web::guard::Repository, page: i64) -> Template {
     let (next_page, prev_page) = next_prev_page(page);
     let context = IndexDTO {
         profile: ProfileDTO {
-            username: env::var("PROFILE_USERNAME").unwrap(),
+            username: profile.clone().name,
             image_url: String::from("/static/image/profile.jpg")
         },
         answered_questions: question_dtos,
@@ -178,7 +178,7 @@ struct SearchQuery {
 }
 
 #[get("/search?<query>")]
-fn search(repo: web::guard::Repository, query: SearchQuery) -> Template {
+fn search(repo: web::guard::Repository, profile: State<UserProfile>, query: SearchQuery) -> Template {
     let query = query.query;
     let mut question_dtos = repo.search_questions(query.clone())
                                 .into_iter()
@@ -187,7 +187,7 @@ fn search(repo: web::guard::Repository, query: SearchQuery) -> Template {
     question_dtos.reverse();
     let context = SearchDTO {
         profile: ProfileDTO {
-            username: env::var("PROFILE_USERNAME").unwrap(),
+            username: profile.clone().name,
             image_url: String::from("/static/image/profile.jpg")
         },
         search_results: question_dtos,
@@ -354,6 +354,11 @@ fn unauthorized(_req: &Request) -> RequireLogin {
     RequireLogin()
 }
 
+#[derive(Clone)]
+struct UserProfile {
+    pub name: String
+}
+
 fn main() {
     dotenv::dotenv().ok();
     let manager = r2d2_diesel::ConnectionManager::<diesel::PgConnection>::new(
@@ -374,9 +379,20 @@ fn main() {
         }
     });
 
+    let user_profile_name = {
+        match env::var("TWITTER_SCREEN_NAME") {
+            Ok(screen_name) => tweet::get_twitter_username(screen_name),
+            _ => env::var("PROFILE_USER_NAME").unwrap()
+        }
+    };
+    let user_profile = UserProfile {
+        name: user_profile_name
+    };
+
     rocket::ignite()
         .manage(pool)
         .manage(tweet_sender)
+        .manage(user_profile)
         .mount("/", routes![
             index, index_with_page, files, post_question, after_post_question, show_question,
             admin_index, admin_post_answer, admin_show_question, admin_hide_question, search

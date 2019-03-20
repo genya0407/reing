@@ -11,14 +11,16 @@ Reingを動かすためには環境変数を設定する必要があります。
   - ログインする際のIDを指定します
 - `ADMIN_PASSWORD`
   - ログインする際のパスワードを指定します
-- `PROFILE_USERNAME`
-  - トップページに表示される回答者の名前を指定します
 - `PROFILE_IMAGE_URL`
   - 例: `https://pbs.twimg.com/profile_images/932824218454016000/lvpcqMk4_400x400.jpg`
   - トップページに表示される回答者のアイコン画像のURLを指定します
 - `DATABASE_URL`
   - 例: `postgresql://username:password@127.0.0.1:5432/database-name`
   - **Herokuを使う場合は設定する必要はありません**
+- `TWITTER_SCREEN_NAME` or `PROFILE_USERNAME`
+  - トップページに表示される回答者の名前を指定します
+  - `TWITTER_SCREEN_NAME`が指定されている場合，サーバー起動のタイミングでTWITTERのAPIを叩いてユーザー名を取得します
+  - `TWITTER_SCREEN_NAME`が指定されていない場合は，`PROFILE_USERNAME`を回答者の名前として使用します
 
 ### 任意
 
