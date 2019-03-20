@@ -382,7 +382,7 @@ fn main() {
     let user_profile_name = {
         match env::var("TWITTER_SCREEN_NAME") {
             Ok(screen_name) => tweet::get_twitter_username(screen_name),
-            _ => env::var("PROFILE_USER_NAME").unwrap()
+            _ => env::var("PROFILE_USERNAME").unwrap()
         }
     };
     let user_profile = UserProfile {
