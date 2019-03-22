@@ -18,7 +18,7 @@
     <div class='answer-form'>
         <form action='/admin/question/{{ id }}/answer' method='POST' id='answer-form'>
             <div>
-                <textarea name='body' onKeyUp="answerChanged(value)"></textarea>
+                <textarea name='body' id='answer-textarea'></textarea>
                 <div class='character-count'><span id='current-character-count'>0</span>/110文字</div>
             </div>
 
@@ -28,17 +28,6 @@
         </form>
     </div>
 
-    <script type='text/javascript'>
-        function answerChanged(text) {
-            document.getElementById('current-character-count').textContent = text.length;
-
-            const submit_button = document.getElementById('submit-button');
-            if (text.length > 110) {
-                submit_button.disabled = true;
-            } else {
-                submit_button.disabled = false;
-            }
-        }
-    </script>
+    <script src='/static/js/answer.js'></script>
 </section>
 {% endblock main %}
