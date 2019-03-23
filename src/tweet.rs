@@ -10,19 +10,26 @@ use std::io::Read;
 use reing_text2image::TextImage;
 use tokio::prelude::Future;
 
-fn get_twitter_access_token() -> egg_mode::Token {
-    let con_token = egg_mode::KeyPair::new(env::var("TWITTER_CONSUMER_KEY").unwrap(), env::var("TWITTER_CONSUMER_SECRET").unwrap());
-    let access_token = egg_mode::KeyPair::new(env::var("TWITTER_ACCESS_TOKEN").unwrap(), env::var("TWITTER_ACCESS_SECRET").unwrap());
+fn get_twitter_access_token() -> Result<egg_mode::Token, std::env::VarError> {
+    let con_token = egg_mode::KeyPair::new(env::var("TWITTER_CONSUMER_KEY")?, env::var("TWITTER_CONSUMER_SECRET")?);
+    let access_token = egg_mode::KeyPair::new(env::var("TWITTER_ACCESS_TOKEN")?, env::var("TWITTER_ACCESS_SECRET")?);
 
-    egg_mode::Token::Access {
+    Ok(egg_mode::Token::Access {
         consumer: con_token,
         access: access_token,
-    }
+    })
 }
 
-pub fn get_twitter_username(screen_name: String) -> String {
-    let token = get_twitter_access_token();
-    block_on_all(egg_mode::user::show(&screen_name, &token).map(|u| u.clone().name)).unwrap()
+pub fn get_twitter_username() -> String {
+    match env::var("TWITTER_SCREEN_NAME") {
+        Ok(screen_name) => {
+            match get_twitter_access_token() {
+                Ok(token) => block_on_all(egg_mode::user::show(&screen_name, &token).map(|u| u.clone().name)).unwrap(),
+                _ => env::var("PROFILE_USERNAME").unwrap()
+            }
+        },
+        _ => env::var("PROFILE_USERNAME").unwrap()
+    }
 }
 
 pub fn tweet_answer(question_id: i32, answer: String, question_image: TextImage) {
@@ -39,7 +46,10 @@ pub fn tweet_answer(question_id: i32, answer: String, question_image: TextImage)
     );
     let tweet_text = format!("{} #reing {}", answer, question_url);
 
-    let token = get_twitter_access_token();
+    let token = match get_twitter_access_token() {
+        Ok(token) => token,
+        _ => return
+    };
     let builder = UploadBuilder::new(image_buf, media_types::image_jpg());
     let media_handle = block_on_all(builder.call(&token)).unwrap();
     let draft = DraftTweet::new(tweet_text)
