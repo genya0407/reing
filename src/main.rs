@@ -1,11 +1,9 @@
-#![feature(plugin)]
-#![feature(custom_derive)]
-#![plugin(rocket_codegen)]
+#![feature(proc_macro_hygiene, decl_macro)]
 
 extern crate dotenv;
 extern crate chrono;
 extern crate uuid;
-extern crate rocket;
+#[macro_use] extern crate rocket;
 extern crate rocket_contrib;
 extern crate base64;
 extern crate serde;
@@ -29,7 +27,7 @@ use rocket::request;
 use rocket::response;
 use rocket::response::status;
 use rocket::Request;
-use rocket_contrib::Template;
+use rocket_contrib::templates::Template;
 use chrono::prelude::*;
 use reing_text2image::TextImage;
 use std::{thread, time};
@@ -86,7 +84,7 @@ impl QuestionDTO {
 fn redirect_ssl(path: PathBuf, _ssl: web::guard::ForceSSL) -> response::Redirect {
     let redirect_to = format!("https://{}/{}", env::var("APPLICATION_DOMAIN").unwrap(), path.as_path().display());
     println!("Redirect to:{}", redirect_to);
-    response::Redirect::to(&redirect_to)
+    response::Redirect::to(redirect_to)
 }
 
 /* GET /static/ */
@@ -172,14 +170,8 @@ struct SearchDTO {
     pub query: String,
 }
 
-#[derive(FromForm)]
-struct SearchQuery {
-    pub query: String
-}
-
 #[get("/search?<query>")]
-fn search(repo: web::guard::Repository, profile: State<UserProfile>, query: SearchQuery) -> Template {
-    let query = query.query;
+fn search(repo: web::guard::Repository, profile: State<UserProfile>, query: String) -> Template {
     let mut question_dtos = repo.search_questions(query.clone())
                                 .into_iter()
                                 .map(|q| QuestionDTO::from(q))
@@ -212,11 +204,11 @@ struct PostQuestionFailedDTO {
 #[post("/questions", data = "<params>")]
 fn post_question(repo: web::guard::Repository, client_ip: web::guard::ClientIP, params: request::Form<PostQuestionForm>)
      -> Result<response::Redirect, Template> {
-    match repo.store_question(params.get().body.clone(), client_ip.address()) {
+    match repo.store_question(params.body.clone(), client_ip.address()) {
         Ok(question) => {
             let question_id = question.id;
             notify::send_email(question);
-            Ok(response::Redirect::to(&format!("/question/{}/after_post", question_id)))
+            Ok(response::Redirect::to(format!("/question/{}/after_post", question_id)))
         },
         Err(err) => {
             match err {
@@ -317,7 +309,7 @@ fn admin_post_answer(
     _auth: web::guard::BasicAuth
     ) -> response::Redirect {
 
-    let answer_body = params.get().body.clone();
+    let answer_body = params.body.clone();
     if let Some(question) = repo.store_answer(id, answer_body.clone()) {
         let text_image = reing_text2image::TextImage::new(question.body, String::from("Reing"), (0x2c, 0x36, 0x5d));
         tweet_sender.send((id, answer_body, text_image)).unwrap();
@@ -391,7 +383,7 @@ fn main() {
             index, index_with_page, files, post_question, after_post_question, show_question,
             admin_index, admin_post_answer, admin_show_question, admin_hide_question, search
         ])
-        .catch(catchers![unauthorized])
+        .register(catchers![unauthorized])
         .attach(Template::fairing())
         .launch();
 }
