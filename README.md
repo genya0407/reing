@@ -23,7 +23,7 @@ https://reing.kuminecraft.xyz/
 
 ### 環境変数を設定する
 
-前節で説明した環境変数を設定します。
+環境変数を設定します。
 
 実行時にターミナルから与えても良いですが、 `.env` で環境変数を設定することができます。
 `.env.sample`に環境変数の設定の例があるので、これを用いるのが簡単だと思います。
@@ -35,9 +35,9 @@ $ vim .env
 
 環境変数の意味は [docs/env.md](/docs/env.md)で解説されています。
 
-### マイグレーション
+### DBの初期化
 
-マイグレーションを行うためには [Diesel CLI](https://github.com/diesel-rs/diesel/tree/master/diesel_cli) がインストールされている必要があります。
+DBを初期化するためには [Diesel CLI](https://github.com/diesel-rs/diesel/tree/master/diesel_cli) がインストールされている必要があります。
 
 ```
 $ cd reing
@@ -52,6 +52,6 @@ $ cargo run
 
 ## How to contribute
 
-もし機能追加などをしてくださる奇特な方がいらっしゃれば大歓迎です。
+機能追加やドキュメントの整備などをしてくださる方は大歓迎です。
 
 まずissueを立てて機能の要求などを相談してくれるとありがたいです。
