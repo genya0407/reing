@@ -26,8 +26,9 @@ diesel = { version = "1.0.0", features = ["postgres", "chrono"] }
 r2d2 = "0.8.2"
 r2d2-diesel = "1.0.0"
 
-lettre = { git = "https://github.com/lettre/lettre", rev = "fc91bb6ee8f9a28b818e98598af0a83a0dbb41d3" }
-lettre_email = { git = "https://github.com/lettre/lettre", rev = "fc91bb6ee8f9a28b818e98598af0a83a0dbb41d3" }
+lettre = "*"
+lettre_email = "*"
+htmlescape = "0.3.1"
 
 image = "0.19.0"
 reing_text2image = { git = "https://github.com/genya0407/reing_text2image.git", rev = "11631a56207ec47d346d5f97c1dd631855b2e7f6" }

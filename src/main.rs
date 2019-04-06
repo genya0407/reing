@@ -17,6 +17,7 @@ extern crate egg_mode;
 extern crate tokio;
 extern crate lettre;
 extern crate lettre_email;
+extern crate htmlescape;
 extern crate reing_text2image;
 
 use std::sync::mpsc::{SyncSender, sync_channel};

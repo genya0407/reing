@@ -20,7 +20,7 @@ pub fn send_email(question: model::Question) {
             .html(
                 format!(
                     "<p>質問が投稿されました</p><p>{}</p><p><a href='{}'>{}</a>",
-                    question.body, question_url, question_url
+                    htmlescape::encode_minimal(&question.body), question_url, question_url
                 )
             )
             .build()
