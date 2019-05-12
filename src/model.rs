@@ -60,8 +60,8 @@ impl Repository {
         }
     }
 
-    pub fn store_answer(&self, id: i32, body: String) -> Option<Answer> {
-        self.find_question(id).map(|mut question| {
+    pub fn store_answer(&self, question_id: i32, body: String) -> Option<Answer> {
+        self.find_question(question_id).map(|question| { // question_idのquestionが存在することを確認
             let new_answer = db::NewAnswer {
                 question_id: question.id,
                 body: body
@@ -75,7 +75,7 @@ impl Repository {
         })
     }
 
-    pub fn answers(&self, offset: i64, count: i64) -> Vec<Question> {
+    pub fn answers(&self, offset: i64, count: i64) -> Vec<Answer> {
         let answers = answers::table
                 .inner_join(questions::table)
                 .order(answers::created_at.desc())
@@ -109,10 +109,33 @@ impl Repository {
         answers.into_iter().map(|(a, q)| self.db2model_answer(a, self.db2model_question(q))).collect()
     }
 
-    pub fn find_answer(&self, id: i32) -> Option<Answer> {
+    pub fn find_question(&self, question_id: i32) -> Option<Question> {
+        questions::table
+            .filter(questions::id.eq(question_id))
+            .limit(1)
+            .load::<db::Question>(self.conn())
+            .unwrap()
+            .first()
+            .cloned()
+            .map(|q| self.db2model_question(q))
+    }
+
+    pub fn find_answer(&self, answer_id: i32) -> Option<Answer> {
         let answer = answers::table
                 .inner_join(questions::table)
-                .filter(questions::id.eq(id))
+                .filter(answers::id.eq(answer_id))
+                .limit(1)
+                .load::<(db::Answer, db::Question)>(self.conn())
+                .unwrap()
+                .first()
+                .cloned();
+        answer.map(|(a, q)| self.db2model_answer(a, self.db2model_question(q)))
+    }
+
+    pub fn find_answer_by_question_id(&self, question_id: i32) -> Option<Answer> {
+        let answer = answers::table
+                .inner_join(questions::table)
+                .filter(questions::id.eq(question_id))
                 .limit(1)
                 .load::<(db::Answer, db::Question)>(self.conn())
                 .unwrap()

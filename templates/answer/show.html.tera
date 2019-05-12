@@ -1,0 +1,34 @@
+{% extends "layout" %}
+
+{% block main %}
+<section class='question-show'>
+    <div class='answer-card'>
+        <div class='header'>
+            <span class='badge'>{{ answer.created_at_recognizable }}</span>
+        </div>
+
+        <div class='answer'>{{ answer.body }}</div>
+
+        <div class='question'>{{ answer.question.body }}</div>
+    </div>
+
+    <div class='next-prev-question'>
+        <div>
+        {% if next_answer %}
+            <a href='/answer/{{ next_answer.id }}'>Next</a>
+        {% endif %}
+        </div>
+
+        <div>
+        {% if prev_answer %}
+            <a href='/answer/{{ prev_answer.id }}'>Prev</a>
+        {% endif %}
+        </div>
+    </div>
+
+    <div class='one-more-question'>
+        <p><small>他の質問を投稿する</small></p>
+        {% include "widget/question_form" %}
+    </div>
+</section>
+{% endblock main %}

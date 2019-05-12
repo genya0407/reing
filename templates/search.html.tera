@@ -31,15 +31,15 @@
 
     {% include "widget/search_form" %}
 
-    {% for q in search_results %}
+    {% for answer in search_results %}
     <div class='question-wrapper'>
-        <a href='/question/{{q.id}}'>
+        <a href='/answer/{{answer.id}}'>
             <div class='question'>
                 <div class='header'>
-                    <span class='badge'>{{ q.created_at_recognizable }}</span>
+                    <span class='badge'>{{ answer.created_at_recognizable }}</span>
                 </div>
 
-                <p>{{q.body}}</p>
+                <p>{{answer.question.body}}</p>
             </div>
         </a>
     </div>

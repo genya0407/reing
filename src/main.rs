@@ -45,6 +45,7 @@ mod notify;
 struct AnswerDTO {
     pub id: i32,
     pub body: String,
+    pub question: QuestionDTO,
     pub created_at: DateTime<Local>,
     pub created_at_recognizable: String,
 }
@@ -53,7 +54,8 @@ impl AnswerDTO {
     fn from(a: model::Answer) -> Self {
         Self {
             id: a.id, body: a.body, created_at: a.created_at,
-            created_at_recognizable: utils::recognizable_datetime(a.created_at)
+            created_at_recognizable: utils::recognizable_datetime(a.created_at),
+            question: QuestionDTO::from(a.question)
         }
     }
 }
@@ -66,7 +68,6 @@ struct QuestionDTO {
     pub hidden: bool,
     pub created_at: DateTime<Local>,
     pub created_at_recognizable: String,
-    pub answers: Vec<AnswerDTO>
 }
 
 impl QuestionDTO {
@@ -74,7 +75,6 @@ impl QuestionDTO {
         Self {
             id: q.id, body: q.body, ip_address: q.ip_address,
             hidden: q.hidden, created_at: q.created_at,
-            answers: q.answers.into_iter().map(|a| AnswerDTO::from(a)).collect::<Vec<_>>(),
             created_at_recognizable: utils::recognizable_datetime(q.created_at)
         }
     }
@@ -103,7 +103,7 @@ fn files(file: PathBuf) -> Result<web::CachedFile, status::NotFound<String>> {
 #[derive(Serialize, Debug)]
 struct IndexDTO {
     pub profile: ProfileDTO,
-    pub answered_questions: Vec<QuestionDTO>,
+    pub answers: Vec<AnswerDTO>,
     pub site_url: String,
     pub next_page: Option<i64>,
     pub prev_page: Option<i64>,
@@ -134,7 +134,7 @@ fn next_prev_page(current_page: i64) -> (Option<i64>, Option<i64>) {
     return (next_page, prev_page);
 }
 
-const QUESTION_COUNT_PER_PAGE : i64 = 30;
+const ANSWER_COUNT_PER_PAGE : i64 = 30;
 #[get("/")]
 fn index(repo: web::guard::Repository, profile: State<UserProfile>) -> Template {
     let page = 0;
@@ -143,19 +143,18 @@ fn index(repo: web::guard::Repository, profile: State<UserProfile>) -> Template 
 
 #[get("/page/<page>")]
 fn index_with_page(repo: web::guard::Repository, profile: State<UserProfile>, page: i64) -> Template {
-    let offset = page * QUESTION_COUNT_PER_PAGE;
-    let mut question_dtos = repo.answered_questions(offset, QUESTION_COUNT_PER_PAGE)
+    let offset = page * ANSWER_COUNT_PER_PAGE;
+    let answer_dtos = repo.answers(offset, ANSWER_COUNT_PER_PAGE)
                                 .into_iter()
-                                .map(|q| QuestionDTO::from(q))
+                                .map(|a| AnswerDTO::from(a))
                                 .collect::<Vec<_>>();
-    question_dtos.reverse();
     let (next_page, prev_page) = next_prev_page(page);
     let context = IndexDTO {
         profile: ProfileDTO {
             username: profile.clone().name,
             image_url: String::from("/static/image/profile.jpg")
         },
-        answered_questions: question_dtos,
+        answers: answer_dtos,
         site_url: format!("https://{}/", env::var("APPLICATION_DOMAIN").unwrap()),
         prev_page: prev_page,
         next_page: next_page,
@@ -166,24 +165,23 @@ fn index_with_page(repo: web::guard::Repository, profile: State<UserProfile>, pa
 #[derive(Serialize, Debug)]
 struct SearchDTO {
     pub profile: ProfileDTO,
-    pub search_results: Vec<QuestionDTO>,
+    pub search_results: Vec<AnswerDTO>,
     pub site_url: String,
     pub query: String,
 }
 
 #[get("/search?<query>")]
 fn search(repo: web::guard::Repository, profile: State<UserProfile>, query: String) -> Template {
-    let mut question_dtos = repo.search_questions(query.clone())
+    let answer_dtos = repo.search_answers(query.clone())
                                 .into_iter()
-                                .map(|q| QuestionDTO::from(q))
+                                .map(|a| AnswerDTO::from(a))
                                 .collect::<Vec<_>>();
-    question_dtos.reverse();
     let context = SearchDTO {
         profile: ProfileDTO {
             username: profile.clone().name,
             image_url: String::from("/static/image/profile.jpg")
         },
-        search_results: question_dtos,
+        search_results: answer_dtos,
         site_url: format!("https://{}/", env::var("APPLICATION_DOMAIN").unwrap()),
         query: query,
     };
@@ -229,9 +227,9 @@ struct AfterPostQuestionDTO{
     pub question: QuestionDTO
 }
 
-#[get("/question/<id>/after_post")]
-fn after_post_question(id: i32, repo: web::guard::Repository) -> Result<Template, response::Redirect> {
-    if let Some(question) = repo.find_question(id) {
+#[get("/question/<question_id>/after_post")]
+fn after_post_question(question_id: i32, repo: web::guard::Repository) -> Result<Template, response::Redirect> {
+    if let Some(question) = repo.find_question(question_id) {
         let context = AfterPostQuestionDTO{
             question: QuestionDTO::from(question)
         };
@@ -241,28 +239,34 @@ fn after_post_question(id: i32, repo: web::guard::Repository) -> Result<Template
     }
 }
 
-/* GET /question/<id> */
+/* GET /answer/<question_id> */
 
 #[derive(Serialize, Debug)]
-struct ShowQuestionDTO {
-    pub question: QuestionDTO,
-    pub next_question: Option<QuestionDTO>,
-    pub prev_question: Option<QuestionDTO>,
+struct ShowAnswerDTO {
+    pub answer: AnswerDTO,
+    pub next_answer: Option<AnswerDTO>,
+    pub prev_answer: Option<AnswerDTO>,
 }
 
-#[get("/question/<id>")]
-fn show_question(id: i32, repo: web::guard::Repository) -> Result<Template, status::NotFound<&'static str>> {
-    if let Some(question) = repo.find_question(id) {
-        if question.answered() {
-            let next_question_opt = repo.find_next_question(question.id);
-            let prev_question_opt = repo.find_prev_question(question.id);
-            let context = ShowQuestionDTO {
-                question: QuestionDTO::from(question),
-                next_question: next_question_opt.map(|q| QuestionDTO::from(q)),
-                prev_question: prev_question_opt.map(|q| QuestionDTO::from(q))
-            };
-            return Ok(Template::render("question/show", &context));
-        }
+#[get("/question/<question_id>")]
+fn show_question(question_id: i32, repo: web::guard::Repository) -> Result<response::Redirect, status::NotFound<&'static str>> {
+    match repo.find_answer_by_question_id(question_id) {
+        Some(answer) => Ok(response::Redirect::to(format!("/answer/{}", answer.id))),
+        None => Err(status::NotFound("not found"))
+    }
+}
+
+#[get("/answer/<answer_id>")]
+fn show_answer(answer_id: i32, repo: web::guard::Repository) -> Result<Template, status::NotFound<&'static str>> {
+    if let Some(answer) = repo.find_answer(answer_id) {
+        let next_answer_opt = repo.find_next_answer(answer.created_at);
+        let prev_answer_opt = repo.find_prev_answer(answer.created_at);
+        let context = ShowAnswerDTO {
+            answer: AnswerDTO::from(answer),
+            next_answer: next_answer_opt.map(|a| AnswerDTO::from(a)),
+            prev_answer: prev_answer_opt.map(|a| AnswerDTO::from(a))
+        };
+        return Ok(Template::render("answer/show", &context));
     }
 
     return Err(status::NotFound("not found"));
@@ -286,43 +290,43 @@ fn admin_index(repo: web::guard::Repository, _auth: web::guard::BasicAuth) -> Te
     Template::render("admin/index", &context)
 }
 
-/* GET /admin/question/<id> */
+/* GET /admin/question/<question_id> */
 
-#[get("/admin/question/<id>")]
-fn admin_show_question(id: i32, repo: web::guard::Repository, _auth: web::guard::BasicAuth) -> Template {
-    let question = repo.find_question(id).unwrap();
+#[get("/admin/question/<question_id>")]
+fn admin_show_question(question_id: i32, repo: web::guard::Repository, _auth: web::guard::BasicAuth) -> Template {
+    let question = repo.find_question(question_id).unwrap();
     let context = QuestionDTO::from(question);
     Template::render("admin/questions/show", &context)
 }
 
-/* POST /question/<id>/answer */
+/* POST /question/<question_id>/answer */
 
 #[derive(FromForm)]
 struct PostAnswerForm {
     body: String
 }
 
-#[post("/admin/question/<id>/answer", data = "<params>")]
+#[post("/admin/question/<question_id>/answer", data = "<params>")]
 fn admin_post_answer(
-    id: i32, repo: web::guard::Repository,
+    question_id: i32, repo: web::guard::Repository,
     params: request::Form<PostAnswerForm>,
     tweet_sender: State<SyncSender<(i32, String, TextImage)>>,
     _auth: web::guard::BasicAuth
     ) -> response::Redirect {
 
     let answer_body = params.body.clone();
-    if let Some(question) = repo.store_answer(id, answer_body.clone()) {
-        let text_image = reing_text2image::TextImage::new(question.body, String::from("Reing"), (0x2c, 0x36, 0x5d));
-        tweet_sender.send((id, answer_body, text_image)).unwrap();
+    if let Some(answer) = repo.store_answer(question_id, answer_body.clone()) {
+        let question_text_image = reing_text2image::TextImage::new(answer.question.body, String::from("Reing"), (0x2c, 0x36, 0x5d));
+        tweet_sender.send((answer.id, answer.body, question_text_image)).unwrap();
     }
     response::Redirect::to("/admin")
 }
 
-/* POST /admin/question/<id>/hide */
+/* POST /admin/question/<question_id>/hide */
 
-#[post("/admin/question/<id>/hide")]
-fn admin_hide_question(id: i32, repo: web::guard::Repository, _auth: web::guard::BasicAuth ) -> response::Redirect {
-    let mut question = repo.find_question(id).unwrap();
+#[post("/admin/question/<question_id>/hide")]
+fn admin_hide_question(question_id: i32, repo: web::guard::Repository, _auth: web::guard::BasicAuth ) -> response::Redirect {
+    let mut question = repo.find_question(question_id).unwrap();
     question.hidden = true;
     repo.update_question(question);
 
@@ -381,8 +385,9 @@ fn main() {
         .manage(tweet_sender)
         .manage(user_profile)
         .mount("/", routes![
-            index, index_with_page, files, post_question, after_post_question, show_question,
-            admin_index, admin_post_answer, admin_show_question, admin_hide_question, search
+            index, index_with_page, files, post_question, after_post_question, show_answer,
+            admin_index, admin_post_answer, admin_show_question, admin_hide_question, search,
+            show_question
         ])
         .register(catchers![unauthorized])
         .attach(Template::fairing())

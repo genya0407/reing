@@ -32,15 +32,15 @@
     {% set query = "" %}
     {% include "widget/search_form" %}
 
-    {% for q in answered_questions %}
+    {% for a in answers %}
     <div class='question-wrapper'>
-        <a href='/question/{{q.id}}'>
+        <a href='/answer/{{a.id}}'>
             <div class='question'>
                 <div class='header'>
-                    <span class='badge'>{{ q.created_at_recognizable }}</span>
+                    <span class='badge'>{{ a.created_at_recognizable }}</span>
                 </div>
 
-                <p>{{q.body}}</p>
+                <p>{{a.question.body}}</p>
             </div>
         </a>
     </div>
