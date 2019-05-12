@@ -52,28 +52,6 @@ div.question-form {
       border: 2px solid #2c365d;
       color: #777; }
 
-div.search-form {
-  max-width: 400px;
-  width: 90%;
-  margin: auto;
-  margin-bottom: 30px; }
-  div.search-form input[type='text'] {
-    width: calc(100% - 100px);
-    box-sizing: border-box;
-    border-radius: 10px;
-    border: 2px solid #2c365d;
-    padding: 10px 20px 10px 20px;
-    font-size: 16px;
-    color: #777; }
-  div.search-form button {
-    width: 80px;
-    font-size: 16px;
-    padding: 10px 10px 10px 10px;
-    border-radius: 10px;
-    background-color: white;
-    border: 2px solid #2c365d;
-    color: #777; }
-
 div.question-wrapper {
   margin-bottom: 20px; }
   div.question-wrapper a {
@@ -169,14 +147,16 @@ section.question-show div.next-prev-question {
   display: flex;
   flex-direction: row;
   justify-content: space-between; }
-  section.question-show div.next-prev-question div a {
-    text-decoration: none;
-    font-size: 15px;
-    color: #777;
-    border-radius: 10px;
-    border: 2px solid #2c365d;
-    background-color: white;
-    padding: 10px 20px 10px 20px; }
+  section.question-show div.next-prev-question div {
+    cursor: pointer; }
+    section.question-show div.next-prev-question div a {
+      text-decoration: none;
+      font-size: 15px;
+      color: #777;
+      border-radius: 10px;
+      border: 2px solid #2c365d;
+      background-color: white;
+      padding: 10px 20px 10px 20px; }
 
 section.admin-question-show div.question {
   background-color: white;
@@ -215,4 +195,29 @@ div.answer-form {
       border: 2px solid #2c365d;
       color: #777; }
 
-/*# sourceMappingURL=application.css.tera.map */
+span[v-cloak], div[v-cloak], p[v-cloak], a[v-cloak] {
+  display: none; }
+
+div.search-form {
+  max-width: 400px;
+  width: 90%;
+  margin: auto;
+  margin-bottom: 30px; }
+  div.search-form input[type='text'] {
+    width: calc(100% - 100px);
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 2px solid #2c365d;
+    padding: 10px 20px 10px 20px;
+    font-size: 16px;
+    color: #777; }
+  div.search-form button {
+    width: 80px;
+    font-size: 16px;
+    padding: 10px 10px 10px 10px;
+    border-radius: 10px;
+    background-color: white;
+    border: 2px solid #2c365d;
+    color: #777; }
+
+/*# sourceMappingURL=application.css.map */

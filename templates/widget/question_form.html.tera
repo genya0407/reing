@@ -7,11 +7,5 @@
             <button type='submit'>質問する</button>
         </div>
     </form>
+    <script src='/static/js/disable_double_submit.js'></script>
 </div>
-
-<script type='text/javascript'>
-    function disableForm(form) {
-        Array.prototype.filter.call(form.elements, (elem) => { return elem.type === 'submit' })
-            .forEach((button) => { button.disabled = true; });
-    }
-</script>

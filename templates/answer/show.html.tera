@@ -2,28 +2,28 @@
 
 {% block main %}
 <section class='question-show'>
-    <div class='answer-card'>
-        <div class='header'>
-            <span class='badge'>{{ answer.created_at_recognizable }}</span>
+    <div  id='app'>
+    {% raw %}
+        <div class='answer-card'>
+            <div class='header'>
+                <span id='created_at_badge' class='badge' v-cloak>{{ answer.created_at_recognizable }}</span>
+            </div>
+
+            <div id='answer-body' class='answer' v-cloak>{{ answer.body }}</div>
+
+            <div id='question-body' class='question' v-cloak>{{ answer.question.body }}</div>
         </div>
 
-        <div class='answer'>{{ answer.body }}</div>
+        <div class='next-prev-question'>
+            <div>
+                <a v-if='next_answer' v-on:click='moveToNext' v-cloak>Next</a>
+            </div>
 
-        <div class='question'>{{ answer.question.body }}</div>
-    </div>
-
-    <div class='next-prev-question'>
-        <div>
-        {% if next_answer %}
-            <a href='/answer/{{ next_answer.id }}'>Next</a>
-        {% endif %}
+            <div>
+                <a v-if='prev_answer' v-on:click='moveToPrev' v-cloak>Prev</a>
+            </div>
         </div>
-
-        <div>
-        {% if prev_answer %}
-            <a href='/answer/{{ prev_answer.id }}'>Prev</a>
-        {% endif %}
-        </div>
+    {% endraw %}
     </div>
 
     <div class='one-more-question'>
@@ -31,4 +31,13 @@
         {% include "widget/question_form" %}
     </div>
 </section>
+
+{% if is_production %}
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+{% else %}
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+{% endif %}
+
+<script src='/static/js/move_to_answer.js'></script>
+
 {% endblock main %}
