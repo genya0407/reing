@@ -255,9 +255,10 @@ fn show_question(question_id: i32, repo: web::guard::Repository) -> Result<respo
 }
 
 #[get("/answer/<_answer_id>")]
-fn show_answer(_answer_id: i32) -> Template {
-    let empty: HashMap<String, String> = HashMap::new();
-    return Template::render("answer/show", &empty);
+fn show_answer(_answer_id: i32, app_env: State<AppEnvironment>) -> Template {
+    let mut context: HashMap<String, bool> = HashMap::new();
+    context.insert(String::from("is_production"), app_env.is_production);
+    return Template::render("answer/show", &context);
 }
 
 #[get("/api/answer/<answer_id>")]
@@ -388,10 +389,15 @@ fn main() {
         name: tweet::get_twitter_username()
     };
 
+    let app_env = AppEnvironment {
+        is_production: env::var("MODE").map(|mode| mode == "production").unwrap_or(false)
+    };
+
     rocket::ignite()
         .manage(pool)
         .manage(tweet_sender)
         .manage(user_profile)
+        .manage(app_env)
         .mount("/", routes![
             index, index_with_page, files, post_question, after_post_question, show_answer,
             admin_index, admin_post_answer, admin_show_question, admin_hide_question, search,
