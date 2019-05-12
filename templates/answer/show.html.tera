@@ -33,9 +33,9 @@
 </section>
 
 {% if is_production %}
-<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="/static/js/vue.min.js"></script>
 {% else %}
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="/static/js/vue.js"></script>
 {% endif %}
 
 <script src='/static/js/move_to_answer.js'></script>
