@@ -21,6 +21,7 @@ extern crate htmlescape;
 extern crate reing_text2image;
 
 use std::sync::mpsc::{SyncSender, sync_channel};
+use std::collections::HashMap;
 use std::env;
 use std::path::{Path, PathBuf};
 use rocket::http::{Header, Status};
@@ -29,6 +30,7 @@ use rocket::response;
 use rocket::response::status;
 use rocket::Request;
 use rocket_contrib::templates::Template;
+use rocket_contrib::json::Json;
 use chrono::prelude::*;
 use std::{thread, time};
 use rocket::State;
@@ -63,8 +65,6 @@ impl AnswerDTO {
 struct QuestionDTO {
     pub id: i32,
     pub body: String,
-    pub ip_address: String,
-    pub hidden: bool,
     pub created_at: DateTime<Local>,
     pub created_at_recognizable: String,
 }
@@ -72,8 +72,7 @@ struct QuestionDTO {
 impl QuestionDTO {
     fn from(q: model::Question) -> Self {
         Self {
-            id: q.id, body: q.body, ip_address: q.ip_address,
-            hidden: q.hidden, created_at: q.created_at,
+            id: q.id, body: q.body, created_at: q.created_at,
             created_at_recognizable: utils::recognizable_datetime(q.created_at)
         }
     }
@@ -255,8 +254,15 @@ fn show_question(question_id: i32, repo: web::guard::Repository) -> Result<respo
     }
 }
 
-#[get("/answer/<answer_id>")]
-fn show_answer(answer_id: i32, repo: web::guard::Repository) -> Result<Template, status::NotFound<&'static str>> {
+#[get("/answer/<_answer_id>")]
+fn show_answer(_answer_id: i32, app_env: State<AppEnvironment>) -> Template {
+    let mut context: HashMap<String, bool> = HashMap::new();
+    context.insert(String::from("is_production"), app_env.is_production);
+    return Template::render("answer/show", &context);
+}
+
+#[get("/api/answer/<answer_id>")]
+fn show_answer_json(answer_id: i32, repo: web::guard::Repository) -> Result<Json<ShowAnswerDTO>, status::NotFound<&'static str>> {
     if let Some(answer) = repo.find_answer(answer_id) {
         let next_answer_opt = repo.find_next_answer(answer.created_at);
         let prev_answer_opt = repo.find_prev_answer(answer.created_at);
@@ -265,7 +271,7 @@ fn show_answer(answer_id: i32, repo: web::guard::Repository) -> Result<Template,
             next_answer: next_answer_opt.map(|a| AnswerDTO::from(a)),
             prev_answer: prev_answer_opt.map(|a| AnswerDTO::from(a))
         };
-        return Ok(Template::render("answer/show", &context));
+        return Ok(Json(context));
     }
 
     return Err(status::NotFound("not found"));
@@ -354,6 +360,11 @@ struct UserProfile {
     pub name: String
 }
 
+#[derive(Clone)]
+struct AppEnvironment {
+    pub is_production: bool
+}
+
 fn main() {
     dotenv::dotenv().ok();
     let manager = r2d2_diesel::ConnectionManager::<diesel::PgConnection>::new(
@@ -378,14 +389,19 @@ fn main() {
         name: tweet::get_twitter_username()
     };
 
+    let app_env = AppEnvironment {
+        is_production: env::var("MODE").map(|mode| mode == "production").unwrap_or(false)
+    };
+
     rocket::ignite()
         .manage(pool)
         .manage(tweet_sender)
         .manage(user_profile)
+        .manage(app_env)
         .mount("/", routes![
             index, index_with_page, files, post_question, after_post_question, show_answer,
             admin_index, admin_post_answer, admin_show_question, admin_hide_question, search,
-            show_question
+            show_question, show_answer_json
         ])
         .register(catchers![unauthorized])
         .attach(Template::fairing())
