@@ -30,7 +30,6 @@ use rocket::response::status;
 use rocket::Request;
 use rocket_contrib::templates::Template;
 use chrono::prelude::*;
-use reing_text2image::TextImage;
 use std::{thread, time};
 use rocket::State;
 
@@ -310,14 +309,13 @@ struct PostAnswerForm {
 fn admin_post_answer(
     question_id: i32, repo: web::guard::Repository,
     params: request::Form<PostAnswerForm>,
-    tweet_sender: State<SyncSender<(i32, String, TextImage)>>,
+    tweet_sender: State<SyncSender<model::Answer>>,
     _auth: web::guard::BasicAuth
     ) -> response::Redirect {
 
     let answer_body = params.body.clone();
     if let Some(answer) = repo.store_answer(question_id, answer_body.clone()) {
-        let question_text_image = reing_text2image::TextImage::new(answer.question.body, String::from("Reing"), (0x2c, 0x36, 0x5d));
-        tweet_sender.send((answer.id, answer.body, question_text_image)).unwrap();
+        tweet_sender.send(answer).unwrap();
     }
     response::Redirect::to("/admin")
 }
@@ -370,8 +368,8 @@ fn main() {
 
     thread::spawn(move || {
         loop {
-            let (question_id, answer, question_image) = tweet_receiver.recv().unwrap();
-            tweet::tweet_answer(question_id, answer, question_image);
+            let answer = tweet_receiver.recv().unwrap();
+            tweet::tweet_answer(answer);
             thread::sleep(time::Duration::from_secs(5 * 60));
         }
     });

@@ -7,8 +7,8 @@ use uuid::Uuid;
 use std::fs::File;
 use std::env;
 use std::io::Read;
-use reing_text2image::TextImage;
 use tokio::prelude::Future;
+use super::model;
 
 fn get_twitter_access_token() -> Result<egg_mode::Token, std::env::VarError> {
     let con_token = egg_mode::KeyPair::new(env::var("TWITTER_CONSUMER_KEY")?, env::var("TWITTER_CONSUMER_SECRET")?);
@@ -32,7 +32,8 @@ pub fn get_twitter_username() -> String {
     }
 }
 
-pub fn tweet_answer(question_id: i32, answer: String, question_image: TextImage) {
+pub fn tweet_answer(answer: model::Answer) {
+    let question_image = reing_text2image::TextImage::new(answer.question.body, String::from("Reing"), (0x2c, 0x36, 0x5d));
     let tmp_filepath = format!("/tmp/{}.jpg", Uuid::new_v4());
     let tmp_filepath = Path::new(&tmp_filepath);
     question_image.save_image(&tmp_filepath).unwrap();
@@ -40,11 +41,11 @@ pub fn tweet_answer(question_id: i32, answer: String, question_image: TextImage)
     File::open(&tmp_filepath).unwrap().read_to_end(&mut image_buf).unwrap();
 
     let question_url = format!(
-        "https://{}/question/{}",
+        "https://{}/answer/{}",
         env::var("APPLICATION_DOMAIN").unwrap(),
-        question_id
+        answer.id
     );
-    let tweet_text = format!("{} #reing {}", answer, question_url);
+    let tweet_text = format!("{} #reing {}", answer.body, question_url);
 
     let token = match get_twitter_access_token() {
         Ok(token) => token,
