@@ -2,13 +2,13 @@ use chrono::prelude::*;
 use r2d2;
 use r2d2_diesel;
 use diesel;
-use db;
+use crate::db;
 use std::ops::Deref;
 use diesel::RunQueryDsl;
 use diesel::QueryDsl;
 use diesel::SaveChangesDsl;
 use diesel::ExpressionMethods;
-use db::schema::{questions, answers};
+use crate::db::schema::{questions, answers};
 
 type DieselConnection = r2d2::PooledConnection<r2d2_diesel::ConnectionManager<diesel::PgConnection>>;
 

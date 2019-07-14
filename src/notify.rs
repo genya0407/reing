@@ -1,7 +1,7 @@
 use lettre::{SmtpTransport, SmtpClient, Transport};
 use lettre_email::EmailBuilder;
 use lettre::smtp::authentication::{Mechanism, Credentials};
-use model;
+use crate::model;
 use std::thread;
 use std::env;
 
