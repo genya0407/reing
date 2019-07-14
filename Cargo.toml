@@ -12,9 +12,6 @@ dotenv = "0.11.0"
 chrono = { version = "0.4.2", features = ["serde"] }
 uuid = { version = "0.6", features = ["v4"] }
 
-rocket = "0.4"
-rocket_codegen = "0.4"
-rocket_contrib = { version = "0.4", features = ["handlebars_templates", "tera_templates", "json"] }
 base64 = "0.9.1"
 serde = "1.0.53"
 serde_derive = "1.0.53"
