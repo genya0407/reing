@@ -17,11 +17,8 @@ extern crate htmlescape;
 extern crate reing_text2image;
 extern crate log;
 
-mod model;
-mod db;
-mod tweet;
-mod utils;
-mod notify;
+mod entity;
+mod usecase;
 
 fn main() {
     dotenv::dotenv().ok();
