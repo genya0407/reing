@@ -24,11 +24,11 @@ pub fn get_twitter_username() -> String {
     match env::var("TWITTER_SCREEN_NAME") {
         Ok(screen_name) => {
             match get_twitter_access_token() {
-                Ok(token) => block_on_all(egg_mode::user::show(&screen_name, &token).map(|u| u.clone().name)).unwrap(),
-                _ => env::var("PROFILE_USERNAME").unwrap()
+                Ok(token) => block_on_all(egg_mode::user::show(&screen_name, &token).map(|u| u.clone().name)).expect("send request"),
+                _ => env::var("PROFILE_USERNAME").expect("failed to fetch environment variable PROFILE_USERNAME")
             }
         },
-        _ => env::var("PROFILE_USERNAME").unwrap()
+        _ => env::var("PROFILE_USERNAME").expect("failed to fetch environment variable PROFILE_USERNAME")
     }
 }
 
@@ -36,13 +36,13 @@ pub fn tweet_answer(answer: model::Answer) {
     let question_image = reing_text2image::TextImage::new(answer.question.body, String::from("Reing"), (0x2c, 0x36, 0x5d));
     let tmp_filepath = format!("/tmp/{}.jpg", Uuid::new_v4());
     let tmp_filepath = Path::new(&tmp_filepath);
-    question_image.save_image(&tmp_filepath).unwrap();
+    question_image.save_image(&tmp_filepath).expect("failed to save image");
     let mut image_buf = vec![];
-    File::open(&tmp_filepath).unwrap().read_to_end(&mut image_buf).unwrap();
+    File::open(&tmp_filepath).expect("failed to open image file").read_to_end(&mut image_buf).expect("failed to read image file");
 
     let question_url = format!(
         "https://{}/answer/{}",
-        env::var("APPLICATION_DOMAIN").unwrap(),
+        env::var("APPLICATION_DOMAIN").expect("failed to fetch environment variable"),
         answer.id
     );
     let tweet_text = format!("{} #reing {}", answer.body, question_url);
@@ -52,8 +52,8 @@ pub fn tweet_answer(answer: model::Answer) {
         _ => return
     };
     let builder = UploadBuilder::new(image_buf, media_types::image_jpg());
-    let media_handle = block_on_all(builder.call(&token)).unwrap();
+    let media_handle = block_on_all(builder.call(&token)).expect("failed to upload media");
     let draft = DraftTweet::new(tweet_text)
                     .media_ids(&[media_handle.id]);
-    block_on_all(draft.send(&token)).unwrap();
+    block_on_all(draft.send(&token)).expect("failed to send tweet");
 }

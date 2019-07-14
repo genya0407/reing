@@ -19,6 +19,7 @@ extern crate lettre;
 extern crate lettre_email;
 extern crate htmlescape;
 extern crate reing_text2image;
+extern crate log;
 
 use std::sync::mpsc::{SyncSender, sync_channel};
 use std::collections::HashMap;
