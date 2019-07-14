@@ -1,5 +1,5 @@
 <div class='question-form'>
-    <form action='/questions' method='POST' onsubmit='disableForm(this)'>
+    <form action='/questions' method='POST'>
         <div>
             <textarea name='body'></textarea>
         </div>
