@@ -45,7 +45,6 @@ pub mod see_all_answers {
 
   mod mock {
     use super::*;
-    use std::sync::Mutex;
 
     #[derive(Clone)]
     pub struct MockOutputPort {
@@ -166,54 +165,70 @@ pub mod see_answer_detail {
       }
     }
   }
+
+  mod mock {
+    use super::*;
+
+    #[derive(Clone)]
+    pub struct MockOutputPort {
+      pub result: Arc<Mutex<Option<Answer>>>
+    }
+
+    impl MockOutputPort {
+      pub fn new() -> Box<MockOutputPort> {
+        Box::new(Self { result: Arc::new(Mutex::new(None)) })
+      }
+    }
+
+    impl OutputPort for MockOutputPort {
+      fn output(&self, answer: Option<Answer>) {
+        let mut data = self.result.lock().unwrap();
+        *data = answer;
+      }
+    }
+
+    #[test]
+    fn test_mock_output_port() {
+      let mop = MockOutputPort::new();
+      let answer = Answer {
+        id: Uuid::new_v4(),
+        body: "answer1".to_string(),
+        created_at: Local::now(),
+        question: Question {
+          id: Uuid::new_v4(),
+          body: String::from("aaa"),
+          ip_address: String::from("0.0.0.0"),
+          hidden: false,
+          created_at: Local::now(),
+        }
+      };
+      mop.output(Some(answer.clone()));
+
+      assert_eq!(*mop.result.lock().unwrap(), Some(answer));
+    }
+
+    #[derive(Clone)]
+    pub struct MockInputPort {
+      pub data: Uuid
+    }
+
+    impl MockInputPort {
+      pub fn new(id: Uuid) -> Box<MockInputPort> {
+        Box::new(Self { data: id })
+      }
+    }
+
+    impl InputPort for MockInputPort {
+      fn input(&self) -> Uuid {
+        self.data.clone()
+      }
+    }
+
+    #[test]
+    fn test_mock_input_port() {
+      let id = Uuid::new_v4();
+      let mip = MockInputPort::new(id);
+      assert_eq!(mip.input(), id)
+    }
+  }
 }
-
-// #[cfg(test)]
-// mod tests {
-//   mod see_all_answers {
-//     use super::super::*;
-
-//     struct SeeAllAnswersWithMock {
-//       answer_repository_mock: MockAnswerRepository
-//     }
-//     impl see_all_answers
-
-//     struct MockSeeAllAnswersOutputPort {
-//       expected_results: Vec<Answer>
-//     }
-//     impl SeeAllAnswersOutputPort for MockSeeAllAnswersOutputPort {
-//       fn output(&self, answers: Vec<Answer>) {
-//         assert_eq!(self.expected_results, answers)
-//       }
-//     }
-
-//     #[test]
-//     fn test_SeeAllAnswersImpl() {
-//       let question = Question {
-//         id: Uuid::new_v4(),
-//         body: String::from("aaa"),
-//         ip_address: String::from("0.0.0.0"),
-//         hidden: false,
-//         created_at: Local::now(),
-//       };
-//       let answers = vec![
-//         Answer {
-//           id: Uuid::new_v4(),
-//           body: "answer1".to_string(),
-//           created_at: Local::now(),
-//           question: question.clone(),
-//         },
-//         Answer{
-//           id: Uuid::new_v4(),
-//           body: "answer2".to_string(),
-//           created_at: Local::now(),
-//           question: question.clone(),
-//         }
-//       ];
-//       let mar = MockAnswerRepository{ answers: answers.clone() };
-//       let sawm = SeeAllAnswersWithMock { answer_repository_mock: mar };
-//       let mo = MockSeeAllAnswersOutputPort { expected_results: answers.clone() };
-//       sawm.execute(Box::new(mo));
-//     }
-//   }
-// }
