@@ -1,3 +1,4 @@
+use crate::usecase::{InputPort, OutputPort};
 use crate::usecase::repository::AnswerRepository;
 use crate::usecase::viewer::{AnswerDTO, entity2dto};
 use crate::entity::{Answer, Question};
@@ -5,16 +6,8 @@ use uuid::Uuid;
 use std::sync::{Mutex, Arc};
 use chrono::Local;
 
-pub trait OutputPort {
-  fn output(&self, answer: Option<AnswerDTO>);
-}
-
-pub trait InputPort {
-  fn input(&self) -> Uuid;
-}
-
 pub trait Usecase {
-  fn execute(&self, iport: Box<InputPort>, oport: Box<OutputPort>);
+  fn execute(&self, iport: Box<InputPort<Uuid>>, oport: Box<OutputPort<Option<AnswerDTO>>>);
 }
 
 pub fn new(answer_repository: Box<AnswerRepository>) -> Box<Usecase> {
@@ -33,7 +26,7 @@ mod implement {
   }
 
   impl super::Usecase for Usecase {
-    fn execute(&self, iport: Box<InputPort>, oport: Box<OutputPort>) {
+    fn execute(&self, iport: Box<InputPort<Uuid>>, oport: Box<OutputPort<Option<AnswerDTO>>>) {
       let answer_id = iport.input();
       let answer = self.answer_repository.find(answer_id).map(entity2dto);
       oport.output(answer)
@@ -55,7 +48,7 @@ mod mock {
     }
   }
 
-  impl OutputPort for MockOutputPort {
+  impl OutputPort<Option<AnswerDTO>> for MockOutputPort {
     fn output(&self, answer: Option<AnswerDTO>) {
       let mut data = self.result.lock().unwrap();
       *data = answer;
@@ -73,7 +66,7 @@ mod mock {
     }
   }
 
-  impl InputPort for MockInputPort {
+  impl InputPort<Uuid> for MockInputPort {
     fn input(&self) -> Uuid {
       self.data.clone()
     }

@@ -1,3 +1,4 @@
+use crate::usecase::OutputPort;
 use crate::usecase::repository::AnswerRepository;
 use crate::usecase::viewer::{AnswerDTO, entity2dto};
 use crate::entity::{Answer, Question};
@@ -7,11 +8,7 @@ use chrono::Local;
 use std::collections::HashMap;
 
 pub trait Usecase {
-  fn execute(&self, output: Box<OutputPort>);
-}
-
-pub trait OutputPort {
-  fn output(&self, answers: Vec<AnswerDTO>);
+  fn execute(&self, output: Box<OutputPort<Vec<AnswerDTO>>>);
 }
 
 pub fn new(repo: Box<AnswerRepository>) -> Box<Usecase> {
@@ -30,7 +27,7 @@ mod implement {
   }
 
   impl super::Usecase for Usecase {
-    fn execute(&self, output: Box<OutputPort>) {
+    fn execute(&self, output: Box<OutputPort<Vec<AnswerDTO>>>) {
       let answer_dtos = self
                           .answer_repository
                           .find_all()
@@ -56,7 +53,7 @@ mod mock {
     }
   }
 
-  impl OutputPort for MockOutputPort {
+  impl OutputPort<Vec<AnswerDTO>> for MockOutputPort {
     fn output(&self, answers: Vec<AnswerDTO>) {
       let mut data = self.result.lock().unwrap();
       *data = answers;
