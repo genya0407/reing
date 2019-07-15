@@ -4,7 +4,7 @@ use crate::entity::Answer;
 use std::sync::Mutex;
 use crate::usecase::repository::{AnswerRepository, QuestionRepository};
 
-mod repository {
+pub mod repository {
   use super::*;
 
   pub struct MockAnswerRepository {

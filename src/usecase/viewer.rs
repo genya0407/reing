@@ -6,8 +6,8 @@ use crate::entity::{Answer, Question};
 use uuid::Uuid;
 use chrono::Local;
 use std::collections::HashMap;
-use crate::mock;
-use std::sync::Mutex;
+use crate::mock::repository::MockAnswerRepository;
+use std::sync::{Mutex, Arc};
 
 pub mod see_all_answers {
   use super::*;
@@ -47,11 +47,18 @@ pub mod see_all_answers {
     use super::*;
     use std::sync::Mutex;
 
-    struct MockOutputPort {
-      result: Mutex<Vec<Answer>>
+    #[derive(Clone)]
+    pub struct MockOutputPort {
+      pub result: Arc<Mutex<Vec<Answer>>>
     }
 
     impl MockOutputPort {
+      pub fn new() -> Box<MockOutputPort> {
+        Box::new(Self { result: Arc::new(Mutex::new(vec![])) })
+      }
+    }
+
+    impl OutputPort for MockOutputPort {
       fn output(&self, answers: Vec<Answer>) {
         let mut data = self.result.lock().unwrap();
         *data = answers;
@@ -60,7 +67,7 @@ pub mod see_all_answers {
 
     #[test]
     fn test_mock_output_port() {
-      let mop = MockOutputPort { result: Mutex::new(vec![]) };
+      let mop = MockOutputPort::new();
       let question = Question {
         id: Uuid::new_v4(),
         body: String::from("aaa"),
@@ -92,10 +99,31 @@ pub mod see_all_answers {
 
   #[cfg(test)]
   mod tests {
+    use super::*;
 
     #[test]
     fn test_usecase() {
+      let repo = MockAnswerRepository::new();
+      repo.store(
+        Answer {
+          id: Uuid::new_v4(),
+          body: "answer1".to_string(),
+          created_at: Local::now(),
+          question: Question {
+            id: Uuid::new_v4(),
+            body: String::from("aaa"),
+            ip_address: String::from("0.0.0.0"),
+            hidden: false,
+            created_at: Local::now(),
+          }
+        }
+      );
+      let oport = mock::MockOutputPort::new();
+      let usecase = super::new(repo);
+      usecase.execute(oport.clone());
 
+      let result_answers = oport.result.lock().unwrap();
+      assert_eq!(result_answers.len(), 1)
     }
   }
 }
