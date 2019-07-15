@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use uuid::Uuid;
 use crate::entity::Answer;
 use std::sync::Mutex;
-use crate::usecase::repository::{AnswerRepository, QuestionRepository};
+use crate::usecase::repository::AnswerRepository;
 
 pub mod repository {
   use super::*;
