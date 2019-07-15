@@ -128,7 +128,7 @@ pub mod see_all_answers {
   }
 }
 
-mod see_answer_detail {
+pub mod see_answer_detail {
   use super::*;
 
   pub trait OutputPort {
