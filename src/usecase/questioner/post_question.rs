@@ -1,19 +1,25 @@
 use crate::entity::Question;
 use crate::entity;
 use crate::usecase::repository::QuestionRepository;
+use crate::usecase::{InputPort, OutputPort};
 use uuid::Uuid;
 use chrono::{Local, DateTime};
 
+#[derive(Clone)]
 pub struct NewQuestionDTO {
   pub question_body: String,
-  pub ip_address: String,
-  pub questioned_at: DateTime<Local>,
+  pub question_ip_address: String,
 }
 
+#[derive(Clone)]
 pub struct QuestionDTO {
   pub question_id: Uuid,
   pub question_body: String,
   pub questioned_at: DateTime<Local>,
+}
+
+pub fn new(question_repository: Box<QuestionRepository>) -> Box<Usecase> {
+  Box::new(implement::Usecase { question_repository: question_repository })
 }
 
 fn model2dto(question: Question) -> QuestionDTO {
@@ -24,38 +30,109 @@ fn model2dto(question: Question) -> QuestionDTO {
   }
 }
 
+#[derive(Debug, Clone)]
 pub enum PostQuestionError {
   BlankBody
 }
 
 trait Usecase {
-  fn execute(&self, iport: InputPort<NewQuestionDTO>, oport: OutputPort<Result<QuestionDTO, PostQuestionError>>);
+  fn execute(&self, iport: Box<InputPort<NewQuestionDTO>>, oport: Box<OutputPort<Result<QuestionDTO, PostQuestionError>>>);
 }
 
 mod implement {
+  use super::*;
+
   pub struct Usecase {
-    question_repository: Box<QuestionRepository>
+    pub question_repository: Box<QuestionRepository>
   }
 
   impl super::Usecase for Usecase {
-    fn execute(&self, iport: InputPort<NewQuestionDTO>, oport: OutputPort<Result<QuestionDTO, PostQuestionError>>) {
+    fn execute(&self, iport: Box<InputPort<NewQuestionDTO>>, oport: Box<OutputPort<Result<QuestionDTO, PostQuestionError>>>) {
       let new_question_dto = iport.input();
       let question = Question {
         id: Uuid::new_v4(),
-        body: new_question_dto.body,
-        ip_address: new_question_dto.ip_address,
+        body: new_question_dto.question_body,
+        ip_address: new_question_dto.question_ip_address,
+        created_at: Local::now(),
         hidden: false,
       };
       let result = match question.validate() {
-        entity::Validation::Valid -> {
-          self.question_repository.store(question);
+        entity::Validation::Valid => {
+          self.question_repository.store(question.clone());
           Ok(model2dto(question))
         },
-        entity::Validation::Invalid(entity::QuestionInvalidReason::BlankBody) -> {
+        entity::Validation::Invalid(entity::QuestionInvalidReason::BlankBody) => {
           Err(PostQuestionError::BlankBody)
         }
       };
       oport.output(result);
     }
+  }
+}
+
+mod mock {
+  use super::*;
+  use crate::usecase::{InputPort, OutputPort};
+  use std::sync::{Mutex, Arc};
+
+  pub struct MockInputPort {
+    pub value: NewQuestionDTO
+  }
+
+  #[derive(Clone)]
+  pub struct MockOutputPort {
+    pub value: Arc<Mutex<Option<Result<QuestionDTO, PostQuestionError>>>>
+  }
+
+  impl InputPort<NewQuestionDTO> for MockInputPort {
+    fn input(&self) -> NewQuestionDTO {
+      return self.value.clone()
+    }
+  }
+
+  impl OutputPort<Result<QuestionDTO, PostQuestionError>> for MockOutputPort {
+    fn output(&self, output: Result<QuestionDTO, PostQuestionError>) {
+      let mut value = self.value.lock().unwrap();
+      *value = Some(output);
+    }
+  }
+
+  impl MockOutputPort {
+    pub fn new() -> Self {
+      Self { value: Arc::new(Mutex::new(None)) }
+    }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::usecase::repository::mock::question_repository::MockQuestionRepository;
+
+  #[test]
+  fn test_valid_request() {
+    let question_repository = Box::new(MockQuestionRepository::new());
+    let usecase = new(question_repository);
+
+    let iport = Box::new(
+      mock::MockInputPort {
+        value: NewQuestionDTO {
+          question_body: String::from("Some body"),
+          question_ip_address: String::from("10.0.0.1"),
+        }
+      }
+    );
+    let oport = Box::new(mock::MockOutputPort::new());
+
+    usecase.execute(iport, oport.clone());
+
+    let lock = oport.value.lock();
+    let result: QuestionDTO = lock.unwrap().clone().unwrap().unwrap();
+    assert_eq!(result.question_body, "Some body");
+  }
+
+  #[test]
+  fn test_empty_body_request() {
+
   }
 }

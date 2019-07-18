@@ -20,6 +20,37 @@ pub mod mock {
   use crate::entity::{Answer, Question};
   use super::{QuestionRepository, AnswerRepository};
 
+  pub mod question_repository {
+    use super::*;
+
+    pub struct MockQuestionRepository {
+      pub questions: Mutex<HashMap<Uuid, Question>>
+    }
+
+    impl MockQuestionRepository {
+      pub fn new() -> Self {
+        Self {
+          questions: Mutex::new(HashMap::new())
+        }
+      }
+    }
+
+    impl QuestionRepository for MockQuestionRepository {
+      fn find(&self, id: Uuid) -> Option<Question> {
+        self.questions.lock().unwrap().get(&id).cloned()
+      }
+
+      fn store(&self, question: Question) {
+        let mut questions = self.questions.lock().unwrap();
+        questions.insert(question.id, question);
+      }
+
+      fn find_all_not_answered_yet(&self) -> Vec<Question> {
+        panic!("not implemented")
+      }
+    }
+  }
+
   pub mod answer_respository {
     use super::*;
 

@@ -1,10 +1,11 @@
 pub mod repository;
 pub mod viewer;
+pub mod questioner;
 
-trait InputPort<T> {
+pub trait InputPort<T> {
   fn input(&self) -> T;
 }
 
-trait OutputPort<T> {
+pub trait OutputPort<T> {
   fn output(&self, t: T);
 }
