@@ -28,7 +28,7 @@ pub struct Question {
 
 impl Question {
   fn validate(&self) -> Validation<QuestionInvalidReason> {
-    if self.body.is_empty() {
+    if self.body.trim().is_empty() {
       Validation::Invalid(QuestionInvalidReason::BlankBody)
     } else {
       Validation::Valid
@@ -46,7 +46,7 @@ pub struct Answer {
 
 impl Answer {
   fn validate(&self) -> Validation<AnswerInvalidReason> {
-    if self.body.is_empty() {
+    if self.body.trim().is_empty() {
       Validation::Invalid(AnswerInvalidReason::BlankBody)
     } else {
       Validation::Valid
