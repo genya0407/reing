@@ -77,6 +77,7 @@ mod mock {
 mod tests {
   use super::*;
   use super::mock::*;
+  use crate::usecase::repository::mock::answer_respository::MockAnswerRepository;
 
   #[test]
   fn test_mock_output_port() {
@@ -104,7 +105,7 @@ mod tests {
 
   #[test]
   fn test_usecase() {
-    use crate::mock::repository::MockAnswerRepository;
+    use crate::usecase::repository::mock::answer_respository::MockAnswerRepository;
 
     let answer = Answer {
       id: Uuid::new_v4(),

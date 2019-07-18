@@ -19,7 +19,6 @@ extern crate log;
 
 mod entity;
 mod usecase;
-mod mock;
 
 fn main() {
     dotenv::dotenv().ok();

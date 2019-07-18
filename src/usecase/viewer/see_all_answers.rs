@@ -96,7 +96,7 @@ mod tests {
 
   #[test]
   fn test_usecase() {
-    use crate::mock::repository::MockAnswerRepository;
+    use crate::usecase::repository::mock::answer_respository::MockAnswerRepository;
 
     let answer_id = Uuid::new_v4();
     let repo = MockAnswerRepository::new();
