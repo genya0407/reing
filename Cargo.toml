@@ -12,6 +12,7 @@ path = "src/main.rs"
 dotenv = "0.11.0"
 chrono = { version = "0.4.2", features = ["serde"] }
 uuid = { version = "0.6", features = ["v4"] }
+sha3 = { version = "0.8.2" }
 
 base64 = "0.9.1"
 serde = "1.0.53"
