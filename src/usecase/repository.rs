@@ -10,7 +10,7 @@ pub trait AnswerRepository {
 pub trait QuestionRepository {
   fn store(&self, question: Question);
   fn find(&self, id: Uuid) -> Option<Question>;
-  fn find_all_not_answered_yet(&self) -> Vec<Question>;
+  fn find_all_not_answered_yet_of(&self, answerer_id: Uuid) -> Vec<Question>;
 }
 
 pub trait AnswererRepository {
@@ -49,7 +49,7 @@ pub mod mock {
         questions.insert(question.id, question);
       }
 
-      fn find_all_not_answered_yet(&self) -> Vec<Question> {
+      fn find_all_not_answered_yet_of(&self, answerer_id: Uuid) -> Vec<Question> {
         panic!("not implemented")
       }
     }
