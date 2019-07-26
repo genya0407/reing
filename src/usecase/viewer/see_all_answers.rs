@@ -1,4 +1,4 @@
-use crate::usecase::OutputPort;
+use crate::usecase::{InputPort, OutputPort};
 use crate::usecase::repository::AnswerRepository;
 use crate::usecase::viewer::{AnswerDTO, entity2dto};
 use crate::entity::{Answer, Question};
@@ -7,8 +7,10 @@ use std::sync::{Mutex, Arc};
 use chrono::Local;
 use std::collections::HashMap;
 
+type AnswererId = Uuid;
+
 pub trait Usecase {
-  fn execute(&self, output: Box<OutputPort<Vec<AnswerDTO>>>);
+    fn execute(&self, iport: Box<InputPort<AnswererId>>, output: Box<OutputPort<Vec<AnswerDTO>>>);
 }
 
 pub fn new(repo: Box<AnswerRepository>) -> Box<Usecase> {
@@ -27,10 +29,11 @@ mod implement {
   }
 
   impl super::Usecase for Usecase {
-    fn execute(&self, output: Box<OutputPort<Vec<AnswerDTO>>>) {
+    fn execute(&self, iport: Box<InputPort<AnswererId>>, output: Box<OutputPort<Vec<AnswerDTO>>>) {
+      let answerer_id = iport.input();
       let answer_dtos = self
                           .answer_repository
-                          .find_all()
+                          .find_all_of(answerer_id)
                           .into_iter()
                           .map(entity2dto)
                           .collect();
