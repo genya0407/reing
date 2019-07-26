@@ -13,6 +13,10 @@ pub trait QuestionRepository {
   fn find_all_not_answered_yet(&self) -> Vec<Question>;
 }
 
+// pub trait AnswererRepository {
+//   fn 
+// }
+
 pub mod mock {
   use std::collections::HashMap;
   use uuid::Uuid;
