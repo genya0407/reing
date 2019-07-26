@@ -5,13 +5,13 @@ use crate::usecase::{InputPort, OutputPort};
 use uuid::Uuid;
 use chrono::{Local, DateTime};
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NewQuestionDTO {
   pub question_body: String,
   pub question_ip_address: String,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct QuestionDTO {
   pub question_id: Uuid,
   pub question_body: String,
@@ -30,7 +30,7 @@ fn model2dto(question: Question) -> QuestionDTO {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PostQuestionError {
   BlankBody
 }
@@ -127,12 +127,29 @@ mod tests {
     usecase.execute(iport, oport.clone());
 
     let lock = oport.value.lock();
-    let result: QuestionDTO = lock.unwrap().clone().unwrap().unwrap();
-    assert_eq!(result.question_body, "Some body");
+    let result: Result<QuestionDTO, PostQuestionError> = lock.unwrap().clone().unwrap();
+    assert_eq!(result.map(|q| q.question_body), Ok("Some body".to_string()));
   }
 
   #[test]
-  fn test_empty_body_request() {
+  fn test_blank_body_request() {
+    let question_repository = Box::new(MockQuestionRepository::new());
+    let usecase = new(question_repository);
 
+    let iport = Box::new(
+      mock::MockInputPort {
+        value: NewQuestionDTO {
+          question_body: String::from(""),
+          question_ip_address: String::from("10.0.0.1"),
+        }
+      }
+    );
+    let oport = Box::new(mock::MockOutputPort::new());
+
+    usecase.execute(iport, oport.clone());
+
+    let lock = oport.value.lock();
+    let result: Result<QuestionDTO, PostQuestionError> = lock.unwrap().clone().unwrap();
+    assert_eq!(result, Err(PostQuestionError::BlankBody));
   }
 }
