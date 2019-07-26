@@ -1,5 +1,7 @@
 use chrono::prelude::*;
 use uuid::Uuid;
+use sha3::Sha3_256;
+use sha3::Digest;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Validation<Reason: Eq> {
@@ -39,6 +41,7 @@ impl Question {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Answer {
     pub id: Uuid,
+    pub answerer_id: Uuid,
     pub body: String,
     pub created_at: DateTime<Local>,
     pub question: Question
@@ -54,3 +57,26 @@ impl Answer {
   }
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Answerer {
+  pub id: Uuid,
+  pub salt: Vec<u8>,
+  pub password_encrypted: Vec<u8>,
+}
+
+impl Answerer {
+  pub fn encrypt(&self, plain: Vec<u8>) -> Vec<u8> {
+    let mut digest = plain.clone();
+    digest.extend(self.salt.clone().into_iter());
+
+    for _ in 0..1024 {
+      digest = Sha3_256::digest(&digest).as_slice().to_vec()
+    }
+
+    digest
+  }
+
+  pub fn authenticate(&self, password: String) -> bool {
+    self.password_encrypted == self.encrypt(password.as_bytes().to_vec()).as_slice()
+  }
+}
