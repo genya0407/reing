@@ -60,23 +60,27 @@ impl Answer {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Answerer {
   pub id: Uuid,
-  pub salt: Vec<u8>,
-  pub password_encrypted: Vec<u8>,
+  pub email: String,
+  pub password_encrypted: String,
 }
 
 impl Answerer {
-  pub fn encrypt(&self, plain: Vec<u8>) -> Vec<u8> {
-    let mut digest = plain.clone();
-    digest.extend(self.salt.clone().into_iter());
-
-    for _ in 0..1024 {
-      digest = Sha3_256::digest(&digest).as_slice().to_vec()
+  pub fn new(email: String, password: String) -> Self {
+    Self {
+      id: Uuid::new_v4(),
+      email: email,
+      password_encrypted: bcrypt::hash(password, bcrypt::DEFAULT_COST).expect("hash generation failed")
     }
-
-    digest
   }
 
   pub fn authenticate(&self, password: String) -> bool {
-    self.password_encrypted == self.encrypt(password.as_bytes().to_vec()).as_slice()
+    bcrypt::verify(password, &self.password_encrypted).expect("password verification failed")
   }
+}
+
+#[test]
+fn test_authentication() {
+  let answerer = Answerer::new(String::from("example@example.com"), String::from("very very secure password"));
+  assert!(answerer.authenticate(String::from("very very secure password")));
+  assert!(!answerer.authenticate(String::from("vary very secure password")));
 }

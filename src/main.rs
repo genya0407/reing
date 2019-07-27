@@ -16,6 +16,7 @@ extern crate lettre_email;
 extern crate htmlescape;
 extern crate reing_text2image;
 extern crate log;
+extern crate bcrypt;
 
 mod entity;
 mod usecase;
