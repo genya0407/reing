@@ -101,11 +101,13 @@ mod tests {
   fn test_usecase() {
     use crate::usecase::repository::mock::answer_respository::MockAnswerRepository;
 
+    let answerer_id = Uuid::new_v4();
     let answer_id = Uuid::new_v4();
     let repo = MockAnswerRepository::new();
     repo.store(
       Answer {
         id: answer_id,
+        answerer_id: answerer_id,
         body: "answer1".to_string(),
         created_at: Local::now(),
         question: Question {
@@ -117,12 +119,31 @@ mod tests {
         }
       }
     );
+    repo.store(
+      Answer {
+        id: Uuid::new_v4(),
+        answerer_id: Uuid::new_v4(),
+        body: "answer1".to_string(),
+        created_at: Local::now(),
+        question: Question {
+          id: Uuid::new_v4(),
+          body: String::from("aaa"),
+          ip_address: String::from("0.0.0.0"),
+          hidden: false,
+          created_at: Local::now(),
+        }
+      }
+    );
+    let iport = Box::new(crate::usecase::MockInputPort {
+      value: answerer_id
+    });
     let oport = MockOutputPort::new();
     let usecase = super::new(repo);
 
-    usecase.execute(oport.clone());
+    usecase.execute(iport, oport.clone());
 
     let result_answers = oport.result.lock().unwrap();
-    assert_eq!(result_answers.first().unwrap().answer_id, answer_id)
+    assert_eq!(result_answers.len(), 1);
+    assert_eq!(result_answers.first().unwrap().answer_id, answer_id);
   }
 }

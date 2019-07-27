@@ -109,6 +109,7 @@ mod tests {
 
     let answer = Answer {
       id: Uuid::new_v4(),
+      answerer_id: Uuid::new_v4(),
       body: "answer1".to_string(),
       created_at: Local::now(),
       question: Question {
