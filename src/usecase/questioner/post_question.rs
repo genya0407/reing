@@ -9,6 +9,7 @@ use chrono::{Local, DateTime};
 pub struct NewQuestionDTO {
   pub question_body: String,
   pub question_ip_address: String,
+  pub answerer_id: Uuid,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -51,6 +52,7 @@ mod implement {
       let new_question_dto = iport.input();
       let question = Question {
         id: Uuid::new_v4(),
+        answerer_id: new_question_dto.answerer_id,
         body: new_question_dto.question_body,
         ip_address: new_question_dto.question_ip_address,
         created_at: Local::now(),
@@ -119,6 +121,7 @@ mod tests {
         value: NewQuestionDTO {
           question_body: String::from("Some body"),
           question_ip_address: String::from("10.0.0.1"),
+          answerer_id: Uuid::new_v4(),
         }
       }
     );
@@ -141,6 +144,7 @@ mod tests {
         value: NewQuestionDTO {
           question_body: String::from(""),
           question_ip_address: String::from("10.0.0.1"),
+          answerer_id: Uuid::new_v4(),
         }
       }
     );

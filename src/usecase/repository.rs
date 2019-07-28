@@ -14,7 +14,8 @@ pub trait QuestionRepository {
 }
 
 pub trait AnswererRepository {
-  fn find(&self, id: Uuid) -> Option<Answerer>;
+  fn find_by_id(&self, id: Uuid) -> Option<Answerer>;
+  fn find_by_email(&self, email: String) -> Option<Answerer>;
 }
 
 pub mod mock {
@@ -74,7 +75,7 @@ pub mod mock {
 
     impl AnswerRepository for MockAnswerRepository {
       fn find_all_of(&self, answerer_id: Uuid) -> Vec<Answer> {
-        self.answers.lock().unwrap().values().map(|a| a.clone()).filter(|a| a.answerer_id == answerer_id).collect()
+        self.answers.lock().unwrap().values().map(|a| a.clone()).filter(|a| a.question.answerer_id == answerer_id).collect()
       }
 
       fn store(&self, answer: Answer) {
@@ -92,22 +93,26 @@ pub mod mock {
     use super::*;
 
     pub struct MockAnswererRepository {
-      pub answerers: Mutex<HashMap<Uuid, Answerer>>
+      pub answerers: Mutex<Vec<Answerer>>
     }
 
     impl MockAnswererRepository {
       pub fn new() -> Box<AnswererRepository> {
         Box::new(
           Self {
-            answerers: Mutex::new(HashMap::new())
+            answerers: Mutex::new(vec![])
           }
         )
       }
     }
 
     impl AnswererRepository for MockAnswererRepository {
-      fn find(&self, id: Uuid) -> Option<Answerer> {
-        self.answerers.lock().unwrap().get(&id).cloned()
+      fn find_by_id(&self, id: Uuid) -> Option<Answerer> {
+        self.answerers.lock().unwrap().iter().find(|a| a.id == id).cloned()
+      }
+
+      fn find_by_email(&self, email: String) -> Option<Answerer> {
+        self.answerers.lock().unwrap().iter().find(|a| a.email == email).cloned()
       }
     }
   }

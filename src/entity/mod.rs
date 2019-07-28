@@ -22,6 +22,7 @@ pub enum AnswerInvalidReason {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Question {
     pub id: Uuid,
+    pub answerer_id: Uuid,
     pub body: String,
     pub ip_address: String,
     pub created_at: DateTime<Local>,
@@ -29,6 +30,17 @@ pub struct Question {
 }
 
 impl Question {
+  pub fn new(answerer_id: Uuid, body: String, ip_address: String) -> Self {
+    Self {
+      id: Uuid::new_v4(),
+      body: body,
+      answerer_id: answerer_id,
+      ip_address: ip_address,
+      created_at: Local::now(),
+      hidden: false,
+    }
+  }
+
   pub fn validate(&self) -> Validation<QuestionInvalidReason> {
     if self.body.trim().is_empty() {
       Validation::Invalid(QuestionInvalidReason::BlankBody)
@@ -41,7 +53,6 @@ impl Question {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Answer {
     pub id: Uuid,
-    pub answerer_id: Uuid,
     pub body: String,
     pub created_at: DateTime<Local>,
     pub question: Question
