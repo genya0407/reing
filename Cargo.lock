@@ -1725,6 +1725,7 @@ dependencies = [
  "log 0.4.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2 0.8.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2-diesel 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "reing_text2image 0.1.0 (git+https://github.com/genya0407/reing_text2image.git?rev=0cfd7c650a552cf29fb011175e7fc1c62e2653ce)",
  "rocket 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_codegen 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",

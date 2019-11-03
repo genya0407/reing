@@ -142,6 +142,29 @@ impl Repository {
             .map(|q| self.db2model_question(q))
     }
 
+    pub fn pick_random_answer(&self) -> Option<Answer> {
+        use rand::Rng;
+
+        let max_answer_id = match answers::table
+            .select(diesel::dsl::max(answers::id))
+            .first(self.conn())
+        {
+            Ok(Some(max_id)) => max_id,
+            _ => return None,
+        };
+        let mut rng = rand::thread_rng();
+        let random_id_lower_limit = rng.gen_range(0, max_answer_id);
+        let answer = answers::table
+            .inner_join(questions::table)
+            .filter(answers::id.ge(random_id_lower_limit))
+            .limit(1)
+            .load::<(db::Answer, db::Question)>(self.conn())
+            .unwrap()
+            .first()
+            .cloned();
+        answer.map(|(a, q)| self.db2model_answer(a, self.db2model_question(q)))
+    }
+
     pub fn find_answer(&self, answer_id: i32) -> Option<Answer> {
         let answer = answers::table
             .inner_join(questions::table)

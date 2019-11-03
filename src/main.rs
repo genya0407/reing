@@ -19,6 +19,7 @@ extern crate htmlescape;
 extern crate lettre;
 extern crate lettre_email;
 extern crate log;
+extern crate rand;
 extern crate reing_text2image;
 extern crate tokio;
 
