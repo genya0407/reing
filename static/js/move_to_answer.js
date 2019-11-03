@@ -11,7 +11,7 @@ const app = new Vue({
         next_answer: null, // same structure as answer
         prev_answer: null  // same structure as answer
     },
-    mounted: function() {
+    mounted: function () {
         this.$nextTick()
             .then(() => {
                 const answer_id = location.pathname.match(/\/answer\/(\d+)/)[1]
@@ -21,7 +21,7 @@ const app = new Vue({
             .then(this.updatePropsByData)
     },
     methods: {
-        moveToNext: function() {
+        moveToNext: function () {
             if (!this.next_answer) {
                 return
             }
@@ -31,7 +31,7 @@ const app = new Vue({
                 .then((response) => response.json())
                 .then(this.updatePropsByData)
         },
-        moveToPrev: function() {
+        moveToPrev: function () {
             if (!this.prev_answer) {
                 return
             }
@@ -41,7 +41,12 @@ const app = new Vue({
                 .then((response) => response.json())
                 .then(this.updatePropsByData)
         },
-        updatePropsByData: function(data) {
+        moveToRandom: function () {
+            fetch(`/api/answer/random`)
+                .then((response) => response.json())
+                .then(this.updatePropsByData)
+        },
+        updatePropsByData: function (data) {
             this.answer = {
                 id: data.answer.id,
                 created_at_recognizable: data.answer.created_at_recognizable,

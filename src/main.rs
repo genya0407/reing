@@ -278,6 +278,24 @@ fn show_random_answer(
     }
 }
 
+#[get("/api/answer/random")]
+fn show_random_answer_json(
+    repo: web::guard::Repository,
+) -> Result<Json<ShowAnswerDTO>, status::NotFound<&'static str>> {
+    if let Some(answer) = repo.pick_random_answer() {
+        let next_answer_opt = repo.find_next_answer(answer.created_at);
+        let prev_answer_opt = repo.find_prev_answer(answer.created_at);
+        let context = ShowAnswerDTO {
+            answer: AnswerDTO::from(answer),
+            next_answer: next_answer_opt.map(|a| AnswerDTO::from(a)),
+            prev_answer: prev_answer_opt.map(|a| AnswerDTO::from(a)),
+        };
+        return Ok(Json(context));
+    }
+
+    return Err(status::NotFound("not found"));
+}
+
 /* GET /answer/<question_id> */
 
 #[derive(Serialize, Debug)]
@@ -472,7 +490,8 @@ fn main() {
                 search,
                 show_question,
                 show_answer_json,
-                show_random_answer
+                show_random_answer,
+                show_random_answer_json,
             ],
         )
         .register(catchers![unauthorized])

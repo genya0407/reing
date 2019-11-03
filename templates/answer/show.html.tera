@@ -20,7 +20,7 @@
             </div>
 
             <div>
-                <a href='/answer/random'>ランダム表示</a>
+                <a v-on:click='moveToRandom'>ランダム表示</a>
             </div>
 
             <div>
