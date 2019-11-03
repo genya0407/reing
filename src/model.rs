@@ -181,6 +181,7 @@ impl Repository {
         let answer = answers::table
             .inner_join(questions::table)
             .filter(answers::id.ge(random_id_lower_limit))
+            .order(answers::id)
             .limit(1)
             .load::<(db::Answer, db::Question)>(self.conn())
             .unwrap()
