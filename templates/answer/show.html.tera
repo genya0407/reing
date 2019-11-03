@@ -8,6 +8,7 @@
 <meta property="og:image:height" content="256" />
 <meta property="og:description"  content="{{ answer.question.body }}" />
 <meta property="og:url"          content="{{ page_url | safe }}" />
+<meta name="twitter:card" content="summary_large_image">
 {% endblock head %}
 
 {% block main %}
