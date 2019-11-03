@@ -22,8 +22,8 @@
                 </div>
 
                 <div>
-                    <a target='_blank' v-bind:href='intent_url()'>
-                        <img src='/static/image/twitter_logo.png' style='height: 32px;'>
+                    <a class='tweet-button' target='_blank' v-bind:href='intent_url()'>
+                        <img src='/static/image/twitter_logo.png'>
                     </a>
                 </div>
             </div>
