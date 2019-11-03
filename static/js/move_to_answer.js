@@ -21,6 +21,9 @@ const app = new Vue({
             .then(this.updatePropsByData)
     },
     methods: {
+        intent_url: function () {
+            return `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location)}&text=${encodeURIComponent(this.answer.body)}`
+        },
         moveToNext: function () {
             if (!this.next_answer) {
                 return

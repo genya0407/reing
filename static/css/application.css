@@ -131,7 +131,9 @@ section.question-show div.answer-card {
   border-radius: 10px;
   color: black; }
   section.question-show div.answer-card div.header {
-    margin-bottom: 10px; }
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between; }
   section.question-show div.answer-card div.answer {
     margin-bottom: 30px;
     white-space: pre-wrap; }
