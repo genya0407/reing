@@ -263,6 +263,21 @@ fn after_post_question(
     }
 }
 
+/* GET /answer/random */
+
+#[get("/answer/random")]
+fn show_random_answer(
+    repo: web::guard::Repository,
+) -> Result<response::Redirect, status::NotFound<&'static str>> {
+    match repo.pick_random_answer() {
+        Some(random_answer) => Ok(response::Redirect::to(format!(
+            "/answer/{}",
+            random_answer.id
+        ))),
+        None => Err(status::NotFound("not found")),
+    }
+}
+
 /* GET /answer/<question_id> */
 
 #[derive(Serialize, Debug)]
@@ -456,7 +471,8 @@ fn main() {
                 admin_hide_question,
                 search,
                 show_question,
-                show_answer_json
+                show_answer_json,
+                show_random_answer
             ],
         )
         .register(catchers![unauthorized])

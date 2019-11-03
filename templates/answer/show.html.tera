@@ -20,6 +20,10 @@
             </div>
 
             <div>
+                <a href='/answer/random'>ランダム表示</a>
+            </div>
+
+            <div>
                 <a v-if='prev_answer' v-on:click='moveToPrev' v-cloak>Prev</a>
             </div>
         </div>
