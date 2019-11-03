@@ -38,6 +38,30 @@ pub enum StoreQuestionError {
     BlankBody,
 }
 
+#[test]
+fn pick_random_answer_test() {
+    dotenv::dotenv().ok();
+    let manager = r2d2_diesel::ConnectionManager::<diesel::PgConnection>::new(
+        std::env::var("DATABASE_URL").unwrap(),
+    );
+    let pool = r2d2::Pool::builder().max_size(15).build(manager).unwrap();
+
+    let mut picked_ids_count = std::collections::HashMap::<i32, i32>::new();
+    for _ in 0..5000 {
+        let repo = Repository::new(pool.get().unwrap());
+        picked_ids_count
+            .entry(repo.pick_random_answer().unwrap().id)
+            .and_modify(|c| *c += 1)
+            .or_insert(1);
+    }
+
+    let mut id_count = picked_ids_count.into_iter().collect::<Vec<(i32, i32)>>();
+    id_count.sort_by_key(|(_id, count)| count.clone());
+    for (id, count) in id_count {
+        println!("Answer {}: {} times", id, count);
+    }
+}
+
 impl Repository {
     pub fn new(pooled_connection: DieselConnection) -> Self {
         Self {
