@@ -23,7 +23,7 @@
 
                 <div>
                     <a target='_blank' v-bind:href='intent_url()'>
-                        <img src='/static/image/twitter_logo.png' style='height: 2em;'>
+                        <img src='/static/image/twitter_logo.png' style='height: 32px;'>
                     </a>
                 </div>
             </div>
