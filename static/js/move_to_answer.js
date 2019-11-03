@@ -22,7 +22,7 @@ const app = new Vue({
     },
     methods: {
         intent_url: function () {
-            return `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location)}&text=${encodeURIComponent(this.answer.body)}`
+            return `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location)}&text=${encodeURIComponent(this.answer.body)}&hashtags=reing`
         },
         moveToNext: function () {
             if (!this.next_answer) {
