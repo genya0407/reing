@@ -32,7 +32,6 @@ use rocket::Request;
 use rocket::State;
 use rocket_contrib::json::Json;
 use rocket_contrib::templates::Template;
-use std::collections::HashMap;
 use std::env;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::{sync_channel, SyncSender};
@@ -278,32 +277,7 @@ fn show_random_answer(
     }
 }
 
-#[get("/api/answer/random")]
-fn show_random_answer_json(
-    repo: web::guard::Repository,
-) -> Result<Json<ShowAnswerDTO>, status::NotFound<&'static str>> {
-    if let Some(answer) = repo.pick_random_answer() {
-        let next_answer_opt = repo.find_next_answer(answer.created_at);
-        let prev_answer_opt = repo.find_prev_answer(answer.created_at);
-        let context = ShowAnswerDTO {
-            answer: AnswerDTO::from(answer),
-            next_answer: next_answer_opt.map(|a| AnswerDTO::from(a)),
-            prev_answer: prev_answer_opt.map(|a| AnswerDTO::from(a)),
-        };
-        return Ok(Json(context));
-    }
-
-    return Err(status::NotFound("not found"));
-}
-
 /* GET /answer/<question_id> */
-
-#[derive(Serialize, Debug)]
-struct ShowAnswerDTO {
-    pub answer: AnswerDTO,
-    pub next_answer: Option<AnswerDTO>,
-    pub prev_answer: Option<AnswerDTO>,
-}
 
 #[get("/question/<question_id>")]
 fn show_question(
@@ -316,22 +290,106 @@ fn show_question(
     }
 }
 
-#[get("/answer/<_answer_id>")]
-fn show_answer(_answer_id: i32, app_env: State<AppEnvironment>) -> Template {
-    let mut context: HashMap<String, bool> = HashMap::new();
-    context.insert(String::from("is_production"), app_env.is_production);
-    return Template::render("answer/show", &context);
+#[get("/question/<question_id>/image.jpg")]
+fn show_question_image(
+    question_id: i32,
+    repo: web::guard::Repository,
+) -> Result<response::NamedFile, status::NotFound<&'static str>> {
+    match repo.find_answer_by_question_id(question_id) {
+        Some(answer) => {
+            let question_image = reing_text2image::TextImage::new(
+                answer.question.body,
+                String::from("Reing"),
+                (0x2c, 0x36, 0x5d),
+            );
+            let tmp_filepath = format!("/tmp/{}.jpg", answer.question.id);
+            let tmp_filepath = Path::new(&tmp_filepath);
+            question_image
+                .save_image(&tmp_filepath)
+                .expect("failed to save image");
+            Ok(response::NamedFile::open(tmp_filepath).unwrap())
+        }
+        None => Err(status::NotFound("not found")),
+    }
+}
+
+#[derive(Serialize, Debug)]
+struct ShowAnswerDTO {
+    pub answer: AnswerDTO,
+    pub next_answer: Option<AnswerDTO>,
+    pub prev_answer: Option<AnswerDTO>,
+    pub is_production: bool,
+    pub page_url: String,
+    pub question_image_url: String,
+}
+
+#[get("/answer/<answer_id>")]
+fn show_answer(
+    answer_id: i32,
+    repo: web::guard::Repository,
+    app_env: State<AppEnvironment>,
+) -> Result<Template, status::NotFound<&'static str>> {
+    if let Some(answer) = repo.find_answer(answer_id) {
+        let next_answer_opt = repo.find_next_answer(answer.created_at);
+        let prev_answer_opt = repo.find_prev_answer(answer.created_at);
+        let context = ShowAnswerDTO {
+            page_url: format!(
+                "https://{}/answer/{}",
+                env::var("APPLICATION_DOMAIN").unwrap(),
+                answer.id,
+            ),
+            question_image_url: format!(
+                "https://{}/question/{}/image.jpg",
+                env::var("APPLICATION_DOMAIN").unwrap(),
+                answer.question.id
+            ),
+            answer: AnswerDTO::from(answer),
+            next_answer: next_answer_opt.map(|a| AnswerDTO::from(a)),
+            prev_answer: prev_answer_opt.map(|a| AnswerDTO::from(a)),
+            is_production: app_env.is_production,
+        };
+        Ok(Template::render("answer/show", &context))
+    } else {
+        Err(status::NotFound("not found"))
+    }
+}
+
+/* GET /api/ */
+
+#[derive(Serialize, Debug)]
+struct ShowAnswerJSONDTO {
+    pub answer: AnswerDTO,
+    pub next_answer: Option<AnswerDTO>,
+    pub prev_answer: Option<AnswerDTO>,
+}
+
+#[get("/api/answer/random")]
+fn show_random_answer_json(
+    repo: web::guard::Repository,
+) -> Result<Json<ShowAnswerJSONDTO>, status::NotFound<&'static str>> {
+    if let Some(answer) = repo.pick_random_answer() {
+        let next_answer_opt = repo.find_next_answer(answer.created_at);
+        let prev_answer_opt = repo.find_prev_answer(answer.created_at);
+        let context = ShowAnswerJSONDTO {
+            answer: AnswerDTO::from(answer),
+            next_answer: next_answer_opt.map(|a| AnswerDTO::from(a)),
+            prev_answer: prev_answer_opt.map(|a| AnswerDTO::from(a)),
+        };
+        return Ok(Json(context));
+    }
+
+    return Err(status::NotFound("not found"));
 }
 
 #[get("/api/answer/<answer_id>")]
 fn show_answer_json(
     answer_id: i32,
     repo: web::guard::Repository,
-) -> Result<Json<ShowAnswerDTO>, status::NotFound<&'static str>> {
+) -> Result<Json<ShowAnswerJSONDTO>, status::NotFound<&'static str>> {
     if let Some(answer) = repo.find_answer(answer_id) {
         let next_answer_opt = repo.find_next_answer(answer.created_at);
         let prev_answer_opt = repo.find_prev_answer(answer.created_at);
-        let context = ShowAnswerDTO {
+        let context = ShowAnswerJSONDTO {
             answer: AnswerDTO::from(answer),
             next_answer: next_answer_opt.map(|a| AnswerDTO::from(a)),
             prev_answer: prev_answer_opt.map(|a| AnswerDTO::from(a)),
@@ -492,6 +550,7 @@ fn main() {
                 show_answer_json,
                 show_random_answer,
                 show_random_answer_json,
+                show_question_image,
             ],
         )
         .register(catchers![unauthorized])
