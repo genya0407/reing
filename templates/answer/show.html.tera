@@ -12,6 +12,7 @@
 {% endblock head %}
 
 {% block main %}
+
 <section class='question-show'>
     <div  id='app'>
     {% raw %}
@@ -48,6 +49,9 @@
         </div>
     {% endraw %}
     </div>
+
+    {% set query = "" %}
+    {% include "widget/search_form" %}
 
     <div class='one-more-question'>
         <p><small>他の質問を投稿する</small></p>
