@@ -1,13 +1,13 @@
+use base64;
+use diesel;
 use model;
 use r2d2;
 use r2d2_diesel;
-use diesel;
-use base64;
-use std::ops::Deref;
-use std::env;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
-use rocket::{Request, State, Outcome};
+use rocket::{Outcome, Request, State};
+use std::env;
+use std::ops::Deref;
 
 /* Guard Repository */
 
@@ -30,7 +30,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Repository {
         let pool = request.guard::<State<DieselPool>>()?;
         match pool.get() {
             Ok(conn) => Outcome::Success(Repository(model::Repository::new(conn))),
-            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
+            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
         }
     }
 }
@@ -49,9 +49,9 @@ impl<'a, 'r> FromRequest<'a, 'r> for ClientIP {
     type Error = ();
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
-        let ip_address = match request.remote() {
+        let ip_address = match request.client_ip() {
             Some(ip_address) => format!("{}", ip_address),
-            None => String::from("")
+            None => String::from(""),
         };
         Outcome::Success(ClientIP(ip_address))
     }
