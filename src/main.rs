@@ -440,6 +440,21 @@ struct PostAnswerForm {
     body: String,
 }
 
+fn twitter_intent_url(answer: model::Answer) -> String {
+    let url = format!(
+        "https://{}/answer/{}",
+        env::var("APPLICATION_DOMAIN").expect("failed to fetch environment variable"),
+        answer.id
+    );
+    let text = answer.body;
+
+    url::form_urlencoded::Serializer::new(String::from("https://twitter.com/intent/tweet?"))
+        .append_pair("url", &url)
+        .append_pair("text", &text)
+        .append_pair("hashtags", "reing")
+        .finish()
+}
+
 #[post("/admin/question/<question_id>/answer", data = "<params>")]
 fn admin_post_answer(
     question_id: i32,
@@ -454,21 +469,6 @@ fn admin_post_answer(
     let mut context = HashMap::new();
     context.insert("twitter_intent_url", twitter_intent_url(answer));
     Template::render("admin/after_post_answer", &context)
-}
-
-fn twitter_intent_url(answer: model::Answer) -> String {
-    let url = format!(
-        "https://{}/answer/{}",
-        env::var("APPLICATION_DOMAIN").expect("failed to fetch environment variable"),
-        answer.id
-    );
-    let text = answer.body;
-
-    url::form_urlencoded::Serializer::new(String::from("https://twitter.com/intent/tweet?"))
-        .append_pair("url", &url)
-        .append_pair("text", &text)
-        .append_pair("hashtags", "reing")
-        .finish()
 }
 
 /* POST /admin/question/<question_id>/hide */
