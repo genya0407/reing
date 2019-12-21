@@ -169,7 +169,7 @@ impl Repository {
     pub fn pick_random_answer(&self) -> Option<Answer> {
         use rand::Rng;
 
-        let max_answer_id = match answers::table
+        let max_answer_id: i32 = match answers::table
             .select(diesel::dsl::max(answers::id))
             .first(self.conn())
         {

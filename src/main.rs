@@ -22,6 +22,7 @@ extern crate log;
 extern crate rand;
 extern crate reing_text2image;
 extern crate tokio;
+extern crate url;
 
 use chrono::prelude::*;
 use rocket::http::{Header, Status};
@@ -34,13 +35,10 @@ use rocket_contrib::json::Json;
 use rocket_contrib::templates::Template;
 use std::env;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::{sync_channel, SyncSender};
-use std::{thread, time};
 
 mod db;
 mod model;
 mod notify;
-mod tweet;
 mod utils;
 mod web;
 
@@ -436,7 +434,7 @@ fn admin_show_question(
 
 /* POST /question/<question_id>/answer */
 
-#[derive(FromForm)]
+#[derive(FromForm, Deserialize)]
 struct PostAnswerForm {
     body: String,
 }
@@ -446,15 +444,37 @@ fn admin_post_answer(
     question_id: i32,
     repo: web::guard::Repository,
     params: request::Form<PostAnswerForm>,
-    tweet_sender: State<SyncSender<model::Answer>>,
     _auth: web::guard::BasicAuth,
-) -> response::Redirect {
+) -> Template {
     let answer_body = params.body.clone();
-    if let Some(answer) = repo.store_answer(question_id, answer_body.clone()) {
-        tweet_sender.send(answer).unwrap();
-    }
-    response::Redirect::to("/admin")
+    let answer = repo
+        .store_answer(question_id, answer_body.clone())
+        .expect("failed to post answer");
+    let mut context = HashMap::new();
+    context.insert(
+        "twitter_intent_url",
+        twitter_intent_url(answer.body.clone(), answer_url(answer)),
+    );
+    Template::render("admin/after_post_answer", &context)
 }
+
+fn twitter_intent_url(text: String, url: String) -> String {
+    url::form_urlencoded::Serializer::new(String::from("https://twitter.com/intent/tweet?"))
+        .append_pair("url", &url)
+        .append_pair("text", &text)
+        .append_pair("hashtags", "reing")
+        .finish()
+}
+
+fn answer_url(answer: model::Answer) -> String {
+    format!(
+        "https://{}/answer/{}",
+        env::var("APPLICATION_DOMAIN").expect("failed to fetch environment variable"),
+        answer.id
+    )
+}
+
+use std::collections::HashMap;
 
 /* POST /admin/question/<question_id>/hide */
 
@@ -509,16 +529,8 @@ fn main() {
     );
     let pool = r2d2::Pool::builder().max_size(15).build(manager).unwrap();
 
-    let (tweet_sender, tweet_receiver) = sync_channel(1000);
-
-    thread::spawn(move || loop {
-        let answer = tweet_receiver.recv().unwrap();
-        tweet::tweet_answer(answer);
-        thread::sleep(time::Duration::from_secs(5 * 60));
-    });
-
     let user_profile = UserProfile {
-        name: tweet::get_twitter_username(),
+        name: env::var("PROFILE_USERNAME").unwrap(),
     };
 
     let app_env = AppEnvironment {
@@ -529,7 +541,6 @@ fn main() {
 
     rocket::ignite()
         .manage(pool)
-        .manage(tweet_sender)
         .manage(user_profile)
         .manage(app_env)
         .mount(
