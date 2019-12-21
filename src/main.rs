@@ -33,6 +33,7 @@ use rocket::Request;
 use rocket::State;
 use rocket_contrib::json::Json;
 use rocket_contrib::templates::Template;
+use std::collections::HashMap;
 use std::env;
 use std::path::{Path, PathBuf};
 
@@ -434,7 +435,7 @@ fn admin_show_question(
 
 /* POST /question/<question_id>/answer */
 
-#[derive(FromForm, Deserialize)]
+#[derive(FromForm)]
 struct PostAnswerForm {
     body: String,
 }
@@ -451,30 +452,24 @@ fn admin_post_answer(
         .store_answer(question_id, answer_body.clone())
         .expect("failed to post answer");
     let mut context = HashMap::new();
-    context.insert(
-        "twitter_intent_url",
-        twitter_intent_url(answer.body.clone(), answer_url(answer)),
-    );
+    context.insert("twitter_intent_url", twitter_intent_url(answer));
     Template::render("admin/after_post_answer", &context)
 }
 
-fn twitter_intent_url(text: String, url: String) -> String {
+fn twitter_intent_url(answer: model::Answer) -> String {
+    let url = format!(
+        "https://{}/answer/{}",
+        env::var("APPLICATION_DOMAIN").expect("failed to fetch environment variable"),
+        answer.id
+    );
+    let text = answer.body;
+
     url::form_urlencoded::Serializer::new(String::from("https://twitter.com/intent/tweet?"))
         .append_pair("url", &url)
         .append_pair("text", &text)
         .append_pair("hashtags", "reing")
         .finish()
 }
-
-fn answer_url(answer: model::Answer) -> String {
-    format!(
-        "https://{}/answer/{}",
-        env::var("APPLICATION_DOMAIN").expect("failed to fetch environment variable"),
-        answer.id
-    )
-}
-
-use std::collections::HashMap;
 
 /* POST /admin/question/<question_id>/hide */
 
