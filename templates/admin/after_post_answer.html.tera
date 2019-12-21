@@ -1,0 +1,11 @@
+{% extends "admin/layout" %}
+
+{% block main %}
+<p>
+    <a href="{{ twitter_intent_url }}" target="_blank">ツイートする</a>
+</p>
+
+<p>
+    <a href="/admin">一覧に戻る</a>
+</p>
+{% endblock %}
