@@ -34,6 +34,7 @@ pub struct Repository {
     pooled_connection: DieselConnection,
 }
 
+#[derive(Debug)]
 pub enum StoreQuestionError {
     BlankBody,
 }
@@ -135,17 +136,24 @@ impl Repository {
             .collect()
     }
 
-    pub fn search_answers(&self, query: String) -> Vec<Answer> {
+    pub fn search_answers(&self, keywords_string: String) -> Vec<Answer> {
         use diesel::BoolExpressionMethods;
         use diesel::TextExpressionMethods;
 
+        let mut query_of_keywords: Box<
+            dyn diesel::BoxableExpression<_, _, SqlType = diesel::sql_types::Bool>,
+        > = Box::new(diesel::dsl::not(questions::id.is_null()));
+        for keyword in keywords_string.split(|c| c == ' ' || c == '　') {
+            let keyword_query = format!("%{}%", keyword);
+            let query_of_keyword = questions::body
+                .like(keyword_query.clone())
+                .or(answers::body.like(keyword_query.clone()));
+            query_of_keywords = Box::new(query_of_keywords.and(query_of_keyword));
+        }
+
         let answers = answers::table
             .inner_join(questions::table)
-            .filter(
-                questions::body
-                    .like(&format!("%{}%", query))
-                    .or(answers::body.like(&format!("%{}%", query))),
-            )
+            .filter(query_of_keywords)
             .order(answers::created_at.desc())
             .load::<(db::Answer, db::Question)>(self.conn())
             .unwrap();
