@@ -320,6 +320,7 @@ struct ShowAnswerDTO {
     pub is_production: bool,
     pub page_url: String,
     pub question_image_url: String,
+    pub unixtime: i64, // FIXME
 }
 
 #[get("/answer/<answer_id>")]
@@ -346,6 +347,7 @@ fn show_answer(
             next_answer: next_answer_opt.map(|a| AnswerDTO::from(a)),
             prev_answer: prev_answer_opt.map(|a| AnswerDTO::from(a)),
             is_production: app_env.is_production,
+            unixtime: Utc::now().timestamp(),
         };
         Ok(Template::render("answer/show", &context))
     } else {
