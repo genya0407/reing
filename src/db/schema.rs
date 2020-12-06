@@ -11,7 +11,6 @@ table! {
     questions (id) {
         id -> Int4,
         body -> Text,
-        ip_address -> Text,
         hidden -> Bool,
         created_at -> Timestamptz,
     }

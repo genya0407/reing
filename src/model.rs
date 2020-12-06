@@ -17,7 +17,6 @@ type DieselConnection =
 pub struct Question {
     pub id: i32,
     pub body: String,
-    pub ip_address: String,
     pub created_at: DateTime<Local>,
     pub hidden: bool,
 }
@@ -77,14 +76,12 @@ impl Repository {
     pub fn store_question(
         &self,
         body: String,
-        ip_address: String,
     ) -> Result<Question, StoreQuestionError> {
         if body.chars().all(|c| char::is_whitespace(c)) {
             Err(StoreQuestionError::BlankBody)
         } else {
             let new_question = db::NewQuestion {
                 body: body,
-                ip_address: ip_address,
             };
 
             let q: db::Question = diesel::insert_into(questions::table)
@@ -252,7 +249,6 @@ impl Repository {
         let q = db::QuestionForm {
             id: question.id,
             body: question.body,
-            ip_address: question.ip_address,
             hidden: question.hidden,
             created_at: question.created_at.with_timezone(&Utc),
         };
@@ -263,7 +259,6 @@ impl Repository {
         Question {
             id: q.id,
             body: q.body,
-            ip_address: q.ip_address,
             created_at: q.created_at.with_timezone(&Local),
             hidden: q.hidden,
         }
