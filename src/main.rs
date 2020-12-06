@@ -216,10 +216,9 @@ struct PostQuestionFailedDTO {
 #[post("/questions", data = "<params>")]
 fn post_question(
     repo: web::guard::Repository,
-    client_ip: web::guard::ClientIP,
     params: request::Form<PostQuestionForm>,
 ) -> Result<response::Redirect, Template> {
-    match repo.store_question(params.body.clone(), client_ip.address()) {
+    match repo.store_question(params.body.clone()) {
         Ok(question) => {
             let question_id = question.id;
             notify::send_email(question);
