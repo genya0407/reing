@@ -26,6 +26,7 @@ ADD Cargo.toml .
 ADD Cargo.lock .
 RUN cargo build --release
 RUN rm src/main.rs && rm ./target/release/deps/reing*
+RUN cargo install diesel_cli --no-default-features --features "postgres"
 ADD . .
 RUN cargo build --release
 

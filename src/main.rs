@@ -516,10 +516,21 @@ struct AppEnvironment {
     pub is_production: bool,
 }
 
+fn database_url() -> String {
+    let user = env::var("POSTGRES_USER").expect("POSTGRES_USER not defined");
+    let pw = env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD not defined");
+    let host = env::var("POSTGRES_HOST").expect("POSTGRES_HOST not defined");
+    let db = env::var("POSTGRES_DB").expect("POSTGRES_DB not defined");
+    let database_url = format!(
+        "postgresql://{}:{}@{}:5432/{}", user, pw, host, db
+    );
+    database_url
+}
+
 fn main() {
     dotenv::dotenv().ok();
     let manager = r2d2_diesel::ConnectionManager::<diesel::PgConnection>::new(
-        env::var("DATABASE_URL").unwrap(),
+        database_url(),
     );
     let pool = r2d2::Pool::builder().max_size(15).build(manager).unwrap();
 
