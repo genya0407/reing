@@ -12,9 +12,9 @@ dotenv = "0.11.0"
 chrono = { version = "0.4.2", features = ["serde"] }
 uuid = { version = "0.6", features = ["v4"] }
 
-rocket = "0.4"
-rocket_codegen = "0.4"
-rocket_contrib = { version = "0.4", features = ["handlebars_templates", "tera_templates", "json"] }
+rocket = "0.4.2"
+rocket_codegen = "0.4.2"
+rocket_contrib = { version = "0.4.2", features = ["handlebars_templates", "tera_templates", "json"] }
 base64 = "0.9.1"
 serde = "1.0.53"
 serde_derive = "1.0.53"
@@ -22,17 +22,14 @@ serde_json = "1.0.39"
 log = "0.4"
 url = "2.1"
 
-egg-mode = { git = 'https://github.com/QuietMisdreavus/twitter-rs', rev = '027c9131b924b742edb1a5a2b0c99a2147c01dc3' }
-tokio = "0.1.13"
-
 diesel = { version = "1.4.2", features = ["postgres", "chrono"] }
 diesel_derives = "1.4.0"
 r2d2 = "0.8.2"
 r2d2-diesel = "1.0.0"
 rand = "*"
 
-lettre = "*"
-lettre_email = "*"
+lettre = "0.9.6"
+lettre_email = "0.9.4"
 htmlescape = "0.3.1"
 
 image = "0.19.0"

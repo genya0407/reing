@@ -1,0 +1,9 @@
+/target
+**/*.rs.bk
+.sass-cache
+.env
+test_images/*
+!test_images/.keep
+bench.csv
+analyze/
+database/

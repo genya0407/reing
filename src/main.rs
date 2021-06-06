@@ -14,14 +14,12 @@ extern crate r2d2;
 extern crate r2d2_diesel;
 #[macro_use]
 extern crate diesel;
-extern crate egg_mode;
 extern crate htmlescape;
 extern crate lettre;
 extern crate lettre_email;
 extern crate log;
 extern crate rand;
 extern crate reing_text2image;
-extern crate tokio;
 extern crate url;
 
 use chrono::prelude::*;
