@@ -1,10 +1,10 @@
 version: '3'
 services:
   web:
-    image: docker.genya0407.net/reing:v3.0
+    image: docker.genya0407.net/reing_web:${TAG}
     command: cargo run --release
     ports:
-      - "127.0.0.1:${HOST_PORT:?err}:3000"
+      - "127.0.0.1:${PORT:?err}:3000"
     restart: always
     links:
       - postgres
