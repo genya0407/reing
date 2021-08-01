@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu AS builder
 
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
@@ -30,3 +30,10 @@ RUN cargo install diesel_cli --no-default-features --features "postgres"
 ADD . .
 RUN cargo build --release
 
+FROM ubuntu
+WORKDIR /app
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update
+RUN apt-get install -y build-essential libssl-dev pkg-config libpq-dev
+COPY . .
+COPY --from=builder /app/target/release/reing /usr/bin/reing

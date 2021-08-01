@@ -3,7 +3,7 @@
         "web": "Dockerfile"
     },
     "context": "genya0407.net",
-    "tag": "v3.1",
+    "tag": "v3.2",
     "projectName": "reing",
     "registry": "docker.genya0407.net",
     "environments": {},
